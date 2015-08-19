@@ -4,6 +4,7 @@
     using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -11,6 +12,25 @@
     public class Program
     {
         public static void Main(string[] args)
+        {
+            args = new[] {
+                @"C:\Users\v-robmc\Desktop\New folder\auth.json",
+                @"C:\Users\v-robmc\Desktop\New folder\code.cs",
+            };
+
+            var output = args.Last();
+            var input = new string[args.Length - 1];
+            for (int index = 0; index < input.Length; index++)
+            {
+                input[index] = args[index];
+            }
+
+            var definations = input.Select(file => SwaggerDefination2.FromNode(JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file))));
+
+            Debugger.Break();
+        }
+
+        public static void Main2(string[] args)
         {           
             var output = args.Last();
             var input = new string[args.Length - 1];
