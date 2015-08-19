@@ -25,7 +25,7 @@
                 input[index] = args[index];
             }
 
-            var definations = input.Select(file => SwaggerDefination2.FromNode(JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file))));
+            var definations = input.Select(file => SwaggerDefination2.FromNode(JsonConvert.DeserializeObject<JObject>(File.ReadAllText(file)))).ToArray();
 
             Debugger.Break();
         }
