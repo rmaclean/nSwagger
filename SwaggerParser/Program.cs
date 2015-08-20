@@ -30,8 +30,17 @@
             Debugger.Break();
         }
 
-        public static void Main2(string[] args)
-        {           
+        public static void Main1(string[] args)
+        {
+            args = new[] 
+                {
+                    @"C:\Users\v-robmc\Desktop\New folder\auth.json",
+                    @"C:\Users\v-robmc\Desktop\New folder\calendar.json",
+                    @"C:\Users\v-robmc\Desktop\New folder\group.json",
+                    @"C:\Users\v-robmc\Desktop\New folder\message.json",
+                    @"C:\Users\v-robmc\Desktop\New folder\code.cs",
+                };
+
             var output = args.Last();
             var input = new string[args.Length - 1];
             for (int index = 0; index < input.Length; index++)
