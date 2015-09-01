@@ -11,7 +11,7 @@
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main1(string[] args)
         {
             args = new[] {
                 @"C:\Users\v-robmc\Desktop\New folder\auth.json",
@@ -30,15 +30,15 @@
             Debugger.Break();
         }
 
-        public static void Main1(string[] args)
+        public static void Main(string[] args)
         {
-            args = new[] 
+            args = new[]
                 {
                     @"C:\Users\v-robmc\Desktop\New folder\auth.json",
                     @"C:\Users\v-robmc\Desktop\New folder\calendar.json",
                     @"C:\Users\v-robmc\Desktop\New folder\group.json",
                     @"C:\Users\v-robmc\Desktop\New folder\message.json",
-                    @"C:\Users\v-robmc\Desktop\New folder\code.cs",
+                   @"C:\Users\v-robmc\Desktop\New folder\code.cs",
                 };
 
             var output = args.Last();
@@ -127,14 +127,7 @@
                         }
                         else
                         {
-                            if (parameter.CustomType)
-                            {
-                                parameters += parameter.Type + " " + parameter.Name;
-                            }
-                            else
-                            {
-                                parameters += ClassMapper(parameter.Type) + " " + parameter.Name;
-                            }
+                            parameters += parameter.CustomType ? parameter.Type + " " + parameter.Name : ClassMapper(parameter.Type) + " " + parameter.Name;
                         }
                     }
 
@@ -144,39 +137,37 @@
 
                     var hasResponse = false;
                     var responseType = "";
+                    var unwrappedClass = "object";
 
-                    if (successResponse.Properties.Count < 1)
+                    if (successResponse.Properties.Count == 0)
                     {
-                        responseClass = "Task";
+                        responseClass = "Task<WrappedResponse";
                         if (!string.IsNullOrWhiteSpace(successResponse.Type))
                         {
                             hasResponse = true;
                             responseType = successResponse.Type;
+                            unwrappedClass = successResponse.Type;
                             responseClass += "<" + successResponse.Type;
                             if (successResponse.IsArray)
                             {
                                 responseClass += "[]";
                                 responseType += "[]";
+                                unwrappedClass += "[]";
                             }
 
-                            responseClass += ">";
+                            responseClass += ">>";
+                        }
+                        else
+                        {
+                            responseClass = "Task<WrappedResponse<object>>";
                         }
                     }
-
-                    if (successResponse.Properties.Count == 1)
-                    {
-                        var successResponseProperty = successResponse.Properties[0];
-                        var @class = ClassName(successResponseProperty);
-                        responseClass = "Task<" + @class + ">";
-                        responseType = @class;
-                        hasResponse = true;
-                    }
-
-                    if (successResponse.Properties.Count > 1)
+                    else
                     {
                         var @class = BuildClass("", successResponse.Properties, methodName, "out");
                         classes.Add(@class.Key, @class.Value);
-                        responseClass = "Task<" + @class.Key + ">";
+                        unwrappedClass = @class.Key;
+                        responseClass = "Task<WrappedResponse<" + @class.Key + ">>";
                         var newClass = new SwaggerClass
                         {
                             Name = @class.Key,
@@ -241,7 +232,7 @@
                             code.AppendLine("            var bodyJson = JsonConvert.SerializeObject(" + bodyParam.Name + ");");
                         }
 
-                        actionLine += (hasResponse ? "await http.PostString" : "var success = await http.PostBool") + "(new Uri(baseUri + \"" + methodPath + "\", UriKind.Absolute)";
+                        actionLine += (hasResponse ? "await http.PostString" : "return await http.PostBool") + "(new Uri(baseUri + \"" + methodPath + "\", UriKind.Absolute)";
 
                         if (bodyParam != null)
                         {
@@ -267,22 +258,13 @@
 
                     if (hasResponse)
                     {
-                        code.AppendLine("            if (string.IsNullOrWhiteSpace(response))");
+                        code.AppendLine("            if (response == null)");
                         code.AppendLine("            {");
-                        code.AppendLine("                return null;");
+                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(false, null);");
                         code.AppendLine("            }");
                         code.AppendLine();
-                        code.AppendLine("            return JsonConvert.DeserializeObject<" + responseType + ">(response);");
-                    }
-                    else
-                    {
-                        if (method.HTTPAction.Equals("post", StringComparison.OrdinalIgnoreCase))
-                        {
-                            code.AppendLine("            if (!success)");
-                            code.AppendLine("            {");
-                            code.AppendLine("                throw new Exception();");
-                            code.AppendLine("            }");
-                        }
+                        code.AppendLine("            var data = JsonConvert.DeserializeObject<" + responseType + ">(response.Data);");
+                        code.AppendLine("            return new WrappedResponse<" + unwrappedClass + ">(response.Succeeded, data);");
                     }
 
                     code.AppendLine("        }");
