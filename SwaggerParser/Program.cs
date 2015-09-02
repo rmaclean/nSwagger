@@ -263,8 +263,15 @@
                         code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(false, null);");
                         code.AppendLine("            }");
                         code.AppendLine();
-                        code.AppendLine("            var data = JsonConvert.DeserializeObject<" + responseType + ">(response.Data);");
-                        code.AppendLine("            return new WrappedResponse<" + unwrappedClass + ">(response.Succeeded, data);");
+                        code.AppendLine("            try");
+                        code.AppendLine("            {");
+                        code.AppendLine("                var data = JsonConvert.DeserializeObject<" + responseType + ">(response.Data);");
+                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(response.Succeeded, data);");
+                        code.AppendLine("            }");
+                        code.AppendLine("            catch (JsonReaderException)");
+                        code.AppendLine("            {");
+                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(false, null);");
+                        code.AppendLine("            }");
                     }
 
                     code.AppendLine("        }");
