@@ -47,6 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extras\client.cs" />
+    <Compile Include="Extras\get.cs" />
+    <Compile Include="Extras\post.cs" />
+    <Compile Include="Extras\WrappedResponse.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

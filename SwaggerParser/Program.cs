@@ -1,4 +1,6 @@
-﻿namespace SwaggerParser
+﻿#define BAMBISA
+
+namespace SwaggerParser
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -57,6 +59,9 @@
             code.AppendLine("    using System;");
             code.AppendLine("    using System.Threading.Tasks;");
             code.AppendLine("    using Newtonsoft.Json;");
+#if BAMBISA
+            code.AppendLine("    using Universal;");
+#endif
             code.AppendLine();
 
             foreach (var defination in definations)
@@ -81,11 +86,17 @@
                 code.AppendLine("    {");
                 code.AppendLine("        private readonly string baseUri;");
                 code.AppendLine();
-
+#if BAMBISA
+                code.AppendLine("        public " + apiClassName + "()");
+                code.AppendLine("        {");
+                code.AppendLine("            this.baseUri = Configuration.Get(ConfigKey.APIUrl)+\"" + defination.BasePath + "\";");
+                code.AppendLine("        }");
+#else
                 code.AppendLine("        public " + apiClassName + "(string baseUri = \"" + defination.BaseUri.AbsoluteUri + "\")");
                 code.AppendLine("        {");
                 code.AppendLine("            this.baseUri = baseUri;");
                 code.AppendLine("        }");
+#endif
 
                 foreach (var method in defination.Methods)
                 {
@@ -297,8 +308,6 @@
             code.AppendLine("}");
 
             File.WriteAllText(output, code.ToString());
-            //Console.WriteLine(code.ToString());
-            //Debugger.Break();
         }
 
         private static KeyValuePair<string, IEnumerable<SwaggerPropertry>> BuildClass(string parameterName, IEnumerable<SwaggerPropertry> properties, string methodName, string direction)
@@ -341,16 +350,7 @@
 
         private static string ClassName(SwaggerPropertry property)
         {
-            var className = "";
-            if (property.CustomType)
-            {
-                className = property.Type;
-            }
-            else
-            {
-                className = ClassMapper(property.Type);
-            }
-
+            var className = property.CustomType ? property.Type : ClassMapper(property.Type);
             if (property.IsArray)
             {
                 className += "[]";
@@ -436,14 +436,7 @@
             if (parsedJson["schemes"] != null)
             {
                 var schemes = parsedJson["schemes"].AsJEnumerable().Values<string>().ToArray();
-                if (schemes.Length == 1)
-                {
-                    url = schemes.First();
-                }
-                else
-                {
-                    url = schemes.Any(_ => _.Equals("https", StringComparison.OrdinalIgnoreCase)) ? "https" : schemes.First();
-                }
+                url = schemes.Length == 1 ? schemes.First() : schemes.Any(_ => _.Equals("https", StringComparison.OrdinalIgnoreCase)) ? "https" : schemes.First();
             }
             else
             {
@@ -455,6 +448,7 @@
             url += parsedJson.Value<string>("host");
             url += parsedJson.Value<string>("basePath");
             defination.BaseUri = new Uri(url, UriKind.Absolute);
+            defination.BasePath = parsedJson.Value<string>("basePath");
 
             if (parsedJson["definitions"] != null)
             {
@@ -594,6 +588,8 @@
 
     internal class SwaggerDefination
     {
+        public string BasePath { get; internal set; }
+
         public Uri BaseUri { get; set; }
 
         public List<SwaggerClass> Classes { get; } = new List<SwaggerClass>();
