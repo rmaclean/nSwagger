@@ -40,7 +40,8 @@ namespace SwaggerParser
                     @"C:\Users\v-robmc\Desktop\New folder\calendar.json",
                     @"C:\Users\v-robmc\Desktop\New folder\group.json",
                     @"C:\Users\v-robmc\Desktop\New folder\message.json",
-                   @"C:\Users\v-robmc\Desktop\New folder\code.cs",
+                    @"C:\Users\v-robmc\Desktop\New folder\feedback.json",
+                    @"C:\Users\v-robmc\Desktop\New folder\code.cs",
                 };
 
             var output = args.Last();
@@ -51,72 +52,71 @@ namespace SwaggerParser
             }
 
             var definations = input.Select(file => ParseSwagger(File.ReadAllText(file))).ToList();
-            var code = new StringBuilder();
+            var code = new CodersStringBuilder();
             var classes = new Dictionary<string, IEnumerable<SwaggerPropertry>>();
-
+            var renderedClasses = new List<string>();
             code.AppendLine("namespace API");
             code.AppendLine("{");
-            code.AppendLine("    using System;");
-            code.AppendLine("    using System.Threading.Tasks;");
-            code.AppendLine("    using Newtonsoft.Json;");
+            code.AppendLine("using System;");
+            code.AppendLine("using System.Threading.Tasks;");
+            code.AppendLine("using Newtonsoft.Json;");
 #if BAMBISA
-            code.AppendLine("    using Universal;");
+            code.AppendLine("using Universal;");
 #endif
             code.AppendLine();
-
             foreach (var defination in definations)
             {
                 var apiClassName = defination.Name.Replace(" ", "");
-                code.AppendLine("    /// <summary>");
-                code.AppendLine("    /// " + defination.Description);
-                code.AppendLine("    /// </summary>");
+                code.AppendLine("/// <summary>");
+                code.AppendLine("/// " + defination.Description);
+                code.AppendLine("/// </summary>");
                 if (defination.Warnings.Any())
                 {
-                    code.AppendLine("    /// <remarks>");
-                    code.AppendLine("    /// The following issues were found in the swagger file");
+                    code.AppendLine("/// <remarks>");
+                    code.AppendLine("/// The following issues were found in the swagger file");
                     foreach (var warning in defination.Warnings)
                     {
-                        code.AppendLine("    /// - " + warning);
+                        code.AppendLine("/// - " + warning);
                     }
 
-                    code.AppendLine("    /// </remarks>");
+                    code.AppendLine("/// </remarks>");
                 }
 
-                code.AppendLine("    public class " + apiClassName);
-                code.AppendLine("    {");
-                code.AppendLine("        private readonly string baseUri;");
+                code.AppendLine("public class " + apiClassName);
+                code.AppendLine("{");
+                code.AppendLine("private readonly string baseUri;");
                 code.AppendLine();
 #if BAMBISA
-                code.AppendLine("        public " + apiClassName + "()");
-                code.AppendLine("        {");
-                code.AppendLine("            this.baseUri = Configuration.Get(ConfigKey.APIUrl)+\"" + defination.BasePath + "\";");
-                code.AppendLine("        }");
+                code.AppendLine("public " + apiClassName + "()");
+                code.AppendLine("{");
+                code.AppendLine("this.baseUri = Configuration.Get(ConfigKey.APIUrl)+\"" + defination.BasePath + "\";");
+                code.AppendLine("}");
 #else
-                code.AppendLine("        public " + apiClassName + "(string baseUri = \"" + defination.BaseUri.AbsoluteUri + "\")");
-                code.AppendLine("        {");
-                code.AppendLine("            this.baseUri = baseUri;");
-                code.AppendLine("        }");
+                code.AppendLine("public " + apiClassName + "(string baseUri = \"" + defination.BaseUri.AbsoluteUri + "\")");
+                code.AppendLine("{");
+                code.AppendLine("    this.baseUri = baseUri;");
+                code.AppendLine("}");
 #endif
 
                 foreach (var method in defination.Methods)
                 {
                     var methodName = method.Path.IndexOf('/', 1) >= 0 ? method.Path.Substring(1, method.Path.IndexOf('/', 1) - 1) : method.Path.Substring(1);
                     code.AppendLine();
-                    code.AppendLine("        /// <summary>");
-                    code.AppendLine("        /// " + method.Description);
-                    code.AppendLine("        /// </summary>");
+                    code.AppendLine("/// <summary>");
+                    code.AppendLine("/// " + method.Description);
+                    code.AppendLine("/// </summary>");
 
                     var parameters = "";
 
                     if (method.TokenAuth)
                     {
-                        code.AppendLine("        /// <param name=\"token\">The OAuth security token</param>");
+                        code.AppendLine("/// <param name=\"token\">The OAuth security token</param>");
                         parameters += "string token";
                     }
 
                     foreach (var parameter in method.Parameters)
                     {
-                        code.AppendLine("        /// <param name=\"" + parameter.Name + "\">" + parameter.Description + "</param>");
+                        code.AppendLine("/// <param name=\"" + parameter.Name + "\">" + parameter.Description + "</param>");
                         if (parameters.Length > 0)
                         {
                             parameters += ", ";
@@ -144,7 +144,7 @@ namespace SwaggerParser
 
                     var successResponse = method.Responses.First(_ => _.Code == 200);
                     var responseClass = "";
-                    code.AppendLine("        /// <returns>" + successResponse.Description + "</returns>");
+                    code.AppendLine("/// <returns>" + successResponse.Description + "</returns>");
 
                     var hasResponse = false;
                     var responseType = "";
@@ -190,21 +190,37 @@ namespace SwaggerParser
                         hasResponse = true;
                     }
 
+                    var has500response = false;
+                    var typeFor500 = "";
+
                     if (method.Responses.Any(_ => _.Code != 200))
                     {
-                        code.AppendLine("        /// <remarks>");
-                        code.AppendLine("        /// Other response codes");
-                        foreach (var otherResponse in method.Responses.Where(_ => _.Code != 200))
+                        var fivehundredresponse = method.Responses.FirstOrDefault(_ => _.Code == 500);
+                        if (fivehundredresponse != null)
                         {
-                            code.AppendLine("        /// " + otherResponse.Code + ": " + otherResponse.Description);
+                            has500response = true;
+                            typeFor500 = fivehundredresponse.Type;
+                        }
+                        
+                        code.AppendLine("/// <remarks>");
+                        code.AppendLine("/// Other response codes");
+                        foreach (var otherResponse in method.Responses.Where(_ => _.Code != 200).OrderBy(_ => _.Code))
+                        {
+                            code.Append("/// " + otherResponse.Code + ": " + otherResponse.Description);
+                            if (!string.IsNullOrWhiteSpace(otherResponse.Type))
+                            {
+                                code.Append(" <seealso cref=\"" + otherResponse.Type + "\"/>", false);
+                            }
+
+                            code.AppendLine();
                         }
 
-                        code.AppendLine("        /// </remarks>");
+                        code.AppendLine("/// </remarks>");
                     }
 
-                    code.AppendLine("        public async " + responseClass + " " + method.HTTPAction + "_" + methodName + "(" + parameters + ")");
-                    code.AppendLine("        {");
-                    code.AppendLine("            var http = new HTTP();");
+                    code.AppendLine("public async " + responseClass + " " + method.HTTPAction + "_" + methodName + "(" + parameters + ")");
+                    code.AppendLine("{");
+                    code.AppendLine("var http = new HTTP();");
                     var actionLine = "";
                     if (hasResponse)
                     {
@@ -240,7 +256,7 @@ namespace SwaggerParser
                         var bodyParam = method.Parameters.FirstOrDefault(_ => _.Location.Equals("body", StringComparison.OrdinalIgnoreCase));
                         if (bodyParam != null)
                         {
-                            code.AppendLine("            var bodyJson = JsonConvert.SerializeObject(" + bodyParam.Name + ");");
+                            code.AppendLine("var bodyJson = JsonConvert.SerializeObject(" + bodyParam.Name + ");");
                         }
 
                         actionLine += (hasResponse ? "await http.PostString" : "return await http.PostBool") + "(new Uri(baseUri + \"" + methodPath + "\", UriKind.Absolute)";
@@ -256,6 +272,12 @@ namespace SwaggerParser
                         actionLine += "await http.GetString(new Uri(baseUri + \"" + methodPath + "\", UriKind.Absolute)";
                     }
 
+                    if (method.HTTPAction.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                    {
+                        actionLine += "await http.DeleteString(new Uri(baseUri + \"" + methodPath + "\", UriKind.Absolute)";
+                    }
+
+
                     if (method.TokenAuth)
                     {
                         actionLine += ", token: token";
@@ -265,43 +287,71 @@ namespace SwaggerParser
 
                     actionLine = actionLine.Replace(" + \"\", UriKind.Absolute)", ", UriKind.Absolute)");
 
-                    code.AppendLine("            " + actionLine);
+                    code.AppendLine(actionLine);
 
                     if (hasResponse)
                     {
-                        code.AppendLine("            if (response == null)");
-                        code.AppendLine("            {");
-                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(false, null);");
-                        code.AppendLine("            }");
+                        code.AppendLine("if (response == null)");
+                        code.AppendLine("{");
+                        code.AppendLine("return new WrappedResponse<" + unwrappedClass + ">(false);");
+                        code.AppendLine("}");
                         code.AppendLine();
-                        code.AppendLine("            try");
-                        code.AppendLine("            {");
-                        code.AppendLine("                var data = JsonConvert.DeserializeObject<" + responseType + ">(response.Data);");
-                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(response.Succeeded, data);");
-                        code.AppendLine("            }");
-                        code.AppendLine("            catch (JsonReaderException)");
-                        code.AppendLine("            {");
-                        code.AppendLine("                return new WrappedResponse<" + unwrappedClass + ">(false, null);");
-                        code.AppendLine("            }");
+                        if (has500response)
+                        {
+                            code.AppendLine("if (response.Succeeded)");
+                            code.AppendLine("{");
+                        }
+                        code.AppendLine("try");
+                        code.AppendLine("{");
+                        code.AppendLine("var data = JsonConvert.DeserializeObject<" + responseType + ">(response.Data);");
+                        code.AppendLine("return new WrappedResponse<" + unwrappedClass + ">(response.Succeeded, data);");
+                        code.AppendLine("}");
+                        code.AppendLine("catch (JsonReaderException)");
+                        code.AppendLine("{");
+                        code.AppendLine("return new WrappedResponse<" + unwrappedClass + ">(false);");
+                        code.AppendLine("}");
+                        if (has500response)
+                        {
+                            code.AppendLine("}");
+                            code.AppendLine("else");
+                            code.AppendLine("{");
+                            code.AppendLine("try");
+                            code.AppendLine("{");
+                            code.AppendLine("var data = JsonConvert.DeserializeObject<" + typeFor500 + ">(response.Data);");
+                            code.AppendLine("return new WrappedResponse<" + unwrappedClass + ">(data.message, data.error);");
+                            code.AppendLine("}");
+                            code.AppendLine("catch (JsonReaderException)");
+                            code.AppendLine("{");
+                            code.AppendLine("return new WrappedResponse<" + unwrappedClass + ">(false);");
+                            code.AppendLine("}");
+                            code.AppendLine("}");
+                        }
                     }
 
-                    code.AppendLine("        }");
+                    code.AppendLine("}");
                 }
 
-                code.AppendLine("    }");
+                code.AppendLine("}");
                 code.AppendLine();
-
-                foreach (var @class in defination.Classes)
+                
+                foreach (var @class in defination.Classes.OrderBy(_ => _.Name))
                 {
                     var className = @class.Name.Replace(" ", "");
-                    code.AppendLine("    public class " + className);
-                    code.AppendLine("    {");
+                    if (renderedClasses.Contains(className))
+                    {
+                        continue;
+                    }
+
+                    renderedClasses.Add(className);
+
+                    code.AppendLine("public class " + className);
+                    code.AppendLine("{");
                     foreach (var classProperty in @class.Properties)
                     {
-                        code.AppendLine("        public " + ClassName(classProperty) + " " + classProperty.Name + " { get; set; }");
+                        code.AppendLine("public " + ClassName(classProperty) + " " + classProperty.Name + " { get; set; }");
                         code.AppendLine();
                     }
-                    code.AppendLine("    }");
+                    code.AppendLine("}");
                     code.AppendLine();
                 }
             }
@@ -555,16 +605,25 @@ namespace SwaggerParser
 
                         if (response["schema"] != null)
                         {
-                            var schemaType = response["schema"]["type"].Value<string>();
-                            if (schemaType.Equals("object", StringComparison.OrdinalIgnoreCase))
+                            var schemaType = response["schema"]["type"]?.Value<string>();
+                            if (schemaType != null)
                             {
-                                swaggerResponse.Properties.AddRange(GetProperties(response["schema"]["properties"]));
-                            }
+                                if (schemaType.Equals("object", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    swaggerResponse.Properties.AddRange(GetProperties(response["schema"]["properties"]));
+                                }
 
-                            if (schemaType.Equals("array", StringComparison.OrdinalIgnoreCase))
+                                if (schemaType.Equals("array", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    swaggerResponse.IsArray = true;
+                                    swaggerResponse.Type = response["schema"]["items"]["$ref"].Value<string>().Substring(14);
+                                }
+                            }
+                            else
                             {
-                                swaggerResponse.IsArray = true;
-                                swaggerResponse.Type = response["schema"]["items"]["$ref"].Value<string>().Substring(14);
+                                var refType = response["schema"]["$ref"].Value<string>();
+                                swaggerResponse.Type = refType.Substring(14);
+                                swaggerResponse.CustomType = true;
                             }
                         }
 
@@ -651,7 +710,7 @@ namespace SwaggerParser
     internal class SwaggerResponse
     {
         public int Code { get; set; }
-
+        public bool CustomType { get; internal set; }
         public string Description { get; set; }
 
         public bool IsArray { get; internal set; }
