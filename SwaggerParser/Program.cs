@@ -41,7 +41,7 @@ namespace SwaggerParser
                     @"C:\Users\v-robmc\Desktop\New folder\group.json",
                     @"C:\Users\v-robmc\Desktop\New folder\message.json",
                     @"C:\Users\v-robmc\Desktop\New folder\feedback.json",
-                    @"C:\Users\v-robmc\Desktop\New folder\code.cs",
+                    @"C:\Users\v-robmc\Desktop\New folder\Bambisa.cs",
                 };
 
             var output = args.Last();
@@ -89,7 +89,7 @@ namespace SwaggerParser
 #if BAMBISA
                 code.AppendLine("public " + apiClassName + "()");
                 code.AppendLine("{");
-                code.AppendLine("this.baseUri = Configuration.Get(ConfigKey.APIUrl)+\"" + defination.BasePath + "\";");
+                code.AppendLine("baseUri = Configuration.Get(ConfigKey.APIUrl)+\"" + defination.BasePath + "\";");
                 code.AppendLine("}");
 #else
                 code.AppendLine("public " + apiClassName + "(string baseUri = \"" + defination.BaseUri.AbsoluteUri + "\")");
