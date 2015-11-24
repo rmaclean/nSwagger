@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SwaggerParser")]
+[assembly: AssemblyTitle("nSwagger")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SwaggerParser")]
+[assembly: AssemblyProduct("nSwagger")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("45ac6cf2-2c06-4ef9-8574-6bca0b7d3725")]
+[assembly: Guid("96c007fc-5349-4919-88b9-02a7801952b3")]
 
 // Version information for an assembly consists of the following four values:
 //
