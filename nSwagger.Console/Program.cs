@@ -7,28 +7,45 @@
 
     internal class Program
     {
-        static void Main(string[] args)
+        [Flags]
+        private enum ExitCodes
         {
-            args = new[] { "/F", "..\\..\\..\\tests\\bookclubbing.json", "generated.cs" };
+            Success = 0,
+            NoSourceFiles = 1,
+            NoTargetFile = 2,
+            TargetFileExists = 4,
+            Help = 8
+        }
+
+        private static int Main(string[] args)
+        {
             Console.Title = "nSwagger.Console";
             Console.CursorVisible = false;
             Console.WriteLine("nSwagger.Console");
+            Console.WriteLine();
             if (args.Length < 2)
             {
                 ShowHelp();
-                return;
+                return (int)ExitCodes.Help;
             }
 
             var sources = new List<string>();
             var target = args.Last();
             var allowOverride = false;
+            var beepWhenDone = false;
             var @namespace = "";
-            for (var count = 0; count < args.Length-1; count++)
+            for (var count = 0; count < args.Length - 1; count++)
             {
                 var argument = args[count];
                 if (argument.Equals("/F", StringComparison.OrdinalIgnoreCase))
                 {
                     allowOverride = true;
+                    continue;
+                }
+
+                if (argument.Equals("/B", StringComparison.OrdinalIgnoreCase))
+                {
+                    beepWhenDone = true;
                     continue;
                 }
 
@@ -44,25 +61,22 @@
 
             if (sources.Count == 0)
             {
-                Console.WriteLine("No source files found.");
-                ShowHelp();
-                return;
+                Console.WriteLine("ERROR: No source files found.");
+                return (int)ExitCodes.NoSourceFiles;
             }
 
             if (string.IsNullOrWhiteSpace(target))
             {
-                Console.WriteLine("No target file found.");
-                ShowHelp();
-                return;
+                Console.WriteLine("ERROR: No target file found. Note, it must be the last parameter");
+                return (int)ExitCodes.NoTargetFile;
             }
 
             if (File.Exists(target))
             {
                 if (!allowOverride)
                 {
-                    Console.WriteLine("Target file already exists and cannot be overwritten.");
-                    ShowHelp();
-                    return;
+                    Console.WriteLine("ERROR: Target file already exists and cannot be overwritten.");
+                    return (int)ExitCodes.TargetFileExists;
                 }
 
                 File.Delete(target);
@@ -85,31 +99,28 @@
             }
 
             Generator.End(config, ns, target);
+            if (beepWhenDone)
+            {
+                Console.Beep();
+            }
+
             Console.WriteLine("Finished producing code: " + target);
             Console.CursorVisible = true;
-        }
-
-        private static void WriteMessage(int offset, string message)
-        {
-            var fits = Console.WindowWidth >= offset + message.Length;
-            if (fits)
-            {
-
-                return;
-            }
+            return (int)ExitCodes.Success;
         }
 
         private static void ShowHelp()
         {
             Console.WriteLine("Takes one or more Swagger specifications and produces a C# output.");
             Console.WriteLine();
-            Console.WriteLine("nSwagger.Console.exe [/F] [/NAMESPACE namespace] sources target");
+            Console.WriteLine("nSwagger.Console.exe [/F] [/B] [/NAMESPACE namespace] sources target");
             Console.WriteLine();
             var messages = new Dictionary<string, string>
             {
                 { "source", "One or more, space seperated, paths to Swagger definations. The paths can exist on disk or be a URL." },
                 { "target", "The target to write the C# output to. NOTE: This MUST be last." },
                 { "/F", "Force override of the target if it already exists." },
+                { "/B", "Beep when done." },
                 { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." }
             };
 
@@ -154,7 +165,6 @@
 
                     Console.CursorLeft = valueOffSet;
                     Console.WriteLine(print);
-
                 }
                 else
                 {
@@ -163,6 +173,15 @@
             }
 
             Console.CursorLeft = 0;
+        }
+
+        private static void WriteMessage(int offset, string message)
+        {
+            var fits = Console.WindowWidth >= offset + message.Length;
+            if (fits)
+            {
+                return;
+            }
         }
     }
 }
