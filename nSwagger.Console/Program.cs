@@ -64,10 +64,8 @@
                     ShowHelp();
                     return;
                 }
-                else
-                {
-                    File.Delete(target);
-                }
+
+                File.Delete(target);
             }
 
             var engine = Engine.Run(sources.ToArray());
@@ -112,7 +110,7 @@
                 { "source", "One or more, space seperated, paths to Swagger definations. The paths can exist on disk or be a URL." },
                 { "target", "The target to write the C# output to. NOTE: This MUST be last." },
                 { "/F", "Force override of the target if it already exists." },
-                { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." },
+                { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." }
             };
 
             WriteAlignedMessages(messages);
