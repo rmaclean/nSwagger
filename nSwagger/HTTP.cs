@@ -58,6 +58,11 @@
                     var errorMessage = string.Empty;
                     try
                     {
+                        if (content != null)
+                        {
+                            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                        }
+
                         if (!string.IsNullOrWhiteSpace(token))
                         {
                             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
@@ -120,7 +125,7 @@
                         }
 
 #if DEBUG
-                        Debug.WriteLine($"HTTP {method} to {uri} returned {await response.Content.ReadAsStringAsync()}");
+                        Debug.WriteLine($"HTTP {method} to {uri} returned {response.StatusCode} with content {await response.Content?.ReadAsStringAsync()}");
 #endif
                         return response;
                     }
