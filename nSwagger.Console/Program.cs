@@ -14,11 +14,13 @@
             NoSourceFiles = 1,
             NoTargetFile = 2,
             TargetFileExists = 4,
-            Help = 8
+            Help = 8,
+            Unknown = 16              
         }
 
         private static int Main(string[] args)
         {
+            args = new[] { "/F", "http://localhost:14446/swagger/docs/v1", "API.cs" };
             Console.Title = "nSwagger.Console";
             Console.CursorVisible = false;
             Console.WriteLine("nSwagger.Console");
@@ -34,6 +36,7 @@
             var allowOverride = false;
             var beepWhenDone = false;
             var @namespace = "";
+            var httpTimeout = 30;
             for (var count = 0; count < args.Length - 1; count++)
             {
                 var argument = args[count];
@@ -53,6 +56,13 @@
                 {
                     count++;
                     @namespace = args[count];
+                    continue;
+                }
+
+                if (argument.Equals("/T", StringComparison.OrdinalIgnoreCase))
+                {
+                    count++;
+                    httpTimeout = Convert.ToInt32(args[count]);
                     continue;
                 }
 
@@ -82,26 +92,37 @@
                 File.Delete(target);
             }
 
-            var engine = Engine.Run(sources.ToArray());
-
-            engine.Wait();
-
-            var config = new Configuration();
-            if (!string.IsNullOrWhiteSpace(@namespace))
+            try
             {
-                config.Namespace = @namespace;
+                var engine = Engine.Run(sources.ToArray());
+                engine.Wait();
+
+                var config = new Configuration
+                {
+                    HTTPTimeout = TimeSpan.FromSeconds(httpTimeout)                    
+                };
+
+                if (!string.IsNullOrWhiteSpace(@namespace))
+                {
+                    config.Namespace = @namespace;
+                }
+
+                var ns = Generator.Begin(config);
+                foreach (var spec in engine.Result)
+                {
+                    ns = Generator.Go(ns, config, spec);
+                }
+
+                Generator.End(config, ns, target);
+                if (beepWhenDone)
+                {
+                    Console.Beep();
+                }
             }
-
-            var ns = Generator.Begin(config);
-            foreach (var spec in engine.Result)
+            catch (nSwaggerException ex)
             {
-                ns = Generator.Go(ns, config, spec);
-            }
-
-            Generator.End(config, ns, target);
-            if (beepWhenDone)
-            {
-                Console.Beep();
+                Console.WriteLine("ERROR: " + ex.Message);
+                return (int)ExitCodes.Unknown;
             }
 
             Console.WriteLine("Finished producing code: " + target);
@@ -113,7 +134,7 @@
         {
             Console.WriteLine("Takes one or more Swagger specifications and produces a C# output.");
             Console.WriteLine();
-            Console.WriteLine("nSwagger.Console.exe [/F] [/B] [/NAMESPACE namespace] sources target");
+            Console.WriteLine("nSwagger.Console.exe [/F] [/B] [/NAMESPACE namespace] [/T httptimeout] sources target");
             Console.WriteLine();
             var messages = new Dictionary<string, string>
             {
@@ -121,7 +142,8 @@
                 { "target", "The target to write the C# output to. NOTE: This MUST be last." },
                 { "/F", "Force override of the target if it already exists." },
                 { "/B", "Beep when done." },
-                { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." }
+                { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." },
+                { "/T", "The HTTP timeout to use in API calls in seconds. Default is 30 secs" }
             };
 
             WriteAlignedMessages(messages);

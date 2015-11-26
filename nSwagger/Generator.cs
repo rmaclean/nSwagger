@@ -18,12 +18,19 @@
             Put,
             Get,
             Post,
-            Delete
+            Delete,
+            Head,
+            Options,
+            Patch
         }
 
         public static NamespaceDeclarationSyntax Begin(Configuration config) =>
             SyntaxFactory.NamespaceDeclaration(SyntaxFactory.IdentifierName(config.Namespace))
-                                                .AddUsings(Using("System"), Using("System.Threading.Tasks"), Using("Newtonsoft.Json"), Using("HTTP"));
+                                                .AddUsings(Using("System"),
+                                                           Using("System.Threading.Tasks"),
+                                                           Using("Newtonsoft.Json"),
+                                                           Using("HTTP"),
+                                                           Using("System.Net.Http"));
 
         public static void End(Configuration config, NamespaceDeclarationSyntax ns, string output)
         {
@@ -46,32 +53,33 @@
 
             var baseClass = SyntaxFactory.ClassDeclaration(className)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .AddMembers(Field("url", "string"), Constructor(className, "if (!string.IsNullOrWhiteSpace(url)){ this.url = url;} else { this.url = \"" + spec.Schemes[0] + "://" + spec.Host + "\"; }", new[] { "url", "string", "null" }))
+                .AddMembers(Field("url", "string").AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)), 
+                Constructor(className, "if (!string.IsNullOrWhiteSpace(url)){ this.url = url;} else { this.url = \"" + spec.Schemes[0] + "://" + spec.Host + "\"; }", new[] { "url", "string", "null" }))
                 .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
             if (spec.Definations != null)
             {
                 foreach (var defination in spec.Definations)
                 {
-                    baseClass = AddDefination(baseClass, defination);
+                    baseClass = AddDefination(baseClass, defination, config);
                 }
             }
 
             foreach (var path in spec.Paths)
             {
-                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Delete, path.Delete, path.Path));
-                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Get, path.Get, path.Path));
-                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Post, path.Post, path.Path));
-                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Put, path.Put, path.Path));
-                //baseClass = AddOperation(baseClass, path.Head, path.Path); //todo: not supported by HTTP wrapper
-                //baseClass = AddOperation(baseClass, path.Options, path.Path);
-                //baseClass = AddOperation(baseClass, path.Patch, path.Path);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Delete, path.Delete, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Get, path.Get, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Post, path.Post, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Put, path.Put, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Head, path.Head, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Options, path.Options, path.Path), config);
+                baseClass = AddOperation(baseClass, OperationConfig.FromValues(HTTPAction.Patch, path.Patch, path.Path), config);
             }
 
             return ns.AddMembers(baseClass);
         }
 
-        private static ClassDeclarationSyntax AddClass(ClassDeclarationSyntax baseClass, string name, Property[] properties)
+        private static ClassDeclarationSyntax AddClass(ClassDeclarationSyntax baseClass, string name, Property[] properties, Configuration config)
         {
             if (name.Equals("object", StringComparison.OrdinalIgnoreCase))
             {
@@ -82,6 +90,16 @@
 
             var @class = SyntaxFactory.ClassDeclaration(className)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.PartialKeyword));
+
+            if (config.AddRefactoringEssentialsPartialClassSupression)
+            {
+                @class = @class.AddAttributeLists(SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(new[] {
+                    SyntaxFactory.Attribute(SyntaxFactory.ParseName("System.Diagnostics.CodeAnalysis.SuppressMessage"))
+                    .AddArgumentListArguments(SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression("\"\"")),
+                                              SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression("\"RECS0001:Class is declared partial but has only one part\"")),
+                                              SyntaxFactory.AttributeArgument(SyntaxFactory.ParseExpression("Justification = \"This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.\"")))
+                })));
+            }
 
             if (properties != null)
             {
@@ -121,9 +139,9 @@
             return baseClass.AddMembers(@class);
         }
 
-        private static ClassDeclarationSyntax AddDefination(ClassDeclarationSyntax baseClass, Defination defination) => AddClass(baseClass, defination.Name, defination.Properties);
+        private static ClassDeclarationSyntax AddDefination(ClassDeclarationSyntax baseClass, Defination defination, Configuration config) => AddClass(baseClass, defination.Name, defination.Properties, config);
 
-        private static ClassDeclarationSyntax AddOperation(ClassDeclarationSyntax @class, OperationConfig config)
+        private static ClassDeclarationSyntax AddOperation(ClassDeclarationSyntax @class, OperationConfig config, Configuration swaggerConfig)
         {
             if (config.Operation == null)
             {
@@ -201,6 +219,8 @@
                 operationName = config.HTTPAction.ToString() + config.Path.Substring(1, end);
             }
 
+            operationName += "Async";
+
             var successResponse = config.Operation.Responses.Where(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299).OrderBy(_ => _.HttpStatusCode).First();
             if (successResponse.Schema != null)
             {
@@ -215,7 +235,7 @@
                         case "OBJECT":
                             {
                                 responseClass = ClassNameNormaliser(operationName + "Out");
-                                @class = AddClass(@class, responseClass, successResponse.Schema.Properties);
+                                @class = AddClass(@class, responseClass, successResponse.Schema.Properties, swaggerConfig);
                                 break;
                             }
                         case "ARRAY":
@@ -258,22 +278,37 @@
             {
                 case HTTPAction.Put:
                     {
-                        httpmethod += "HTTP.HTTP.PutStringAsync";
+                        httpmethod += "HTTP.HTTP.PutAsync";
                         break;
                     }
                 case HTTPAction.Get:
                     {
-                        httpmethod += "HTTP.HTTP.GetStringAsync";
+                        httpmethod += "HTTP.HTTP.GetAsync";
                         break;
                     }
                 case HTTPAction.Post:
                     {
-                        httpmethod += "HTTP.HTTP.PostStringAsync";
+                        httpmethod += "HTTP.HTTP.PostAsync";
                         break;
                     }
                 case HTTPAction.Delete:
                     {
-                        httpmethod += "HTTP.HTTP.DeleteStringAsync";
+                        httpmethod += "HTTP.HTTP.DeleteAsync";
+                        break;
+                    }
+                case HTTPAction.Head:
+                    {
+                        httpmethod += "HTTP.HTTP.HeadAsync";
+                        break;
+                    }
+                case HTTPAction.Options:
+                    {
+                        httpmethod += "HTTP.HTTP.OptionsAsync";
+                        break;
+                    }
+                case HTTPAction.Patch:
+                    {
+                        httpmethod += "HTTP.HTTP.PatchAsync";
                         break;
                     }
             }
@@ -287,11 +322,11 @@
                 }
             }
 
-            httpmethod += "(new Uri(url + \"" + urlPath + "\", UriKind.Absolute)";
+            httpmethod += $"(new Uri(url + \"{urlPath}\", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds({swaggerConfig.HTTPTimeout.TotalSeconds}))";
             if (hasBodyParam)
             {
                 var bodyParamName = parameters.Single(_ => _.Location != null && _.Location.Equals("body", StringComparison.OrdinalIgnoreCase)).Name;
-                httpmethod += ", JsonConvert.SerializeObject(" + bodyParamName + ")";
+                httpmethod += $", new StringContent(JsonConvert.SerializeObject({bodyParamName}))";
             }
 
             if (authedCall)
@@ -304,12 +339,12 @@
             var methodBody = $@"
 {{
 var response = {httpmethod}
-if (!response.HTTPStatusCode.HasValue)
+if (response == null)
 {{
-return new APIResponse<{responseClass}>();
+return new APIResponse<{responseClass}>(false);
 }}
 
- switch ((int)response.HTTPStatusCode.Value)
+ switch ((int)response.StatusCode)
  {{";
 
             var successId = config.Operation.Responses.First(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299).HttpStatusCode;
@@ -322,25 +357,25 @@ return new APIResponse<{responseClass}>();
                 {
                     if (response.Schema == null || response.Schema.Type == "object")
                     {
-                        methodBody += $"return new APIResponse<{responseClass}>(response.HTTPStatusCode.Value);";
+                        methodBody += $"return new APIResponse<{responseClass}>(response.StatusCode);";
                     }
                     else
                     {
-                        methodBody += $@"var data = JsonConvert.DeserializeObject<{responseClass}>(response.Data);
-return new APIResponse<{responseClass}>(successData: data, statusCode: response.HTTPStatusCode.Value);";
+                        methodBody += $@"var data = JsonConvert.DeserializeObject<{responseClass}>(await response.Content.ReadAsStringAsync());
+return new APIResponse<{responseClass}>(successData: data, statusCode: response.StatusCode);";
                     }
                 }
                 else
                 {
                     if (response.Schema == null || response.Schema.Type == "object")
                     {
-                        methodBody += $"return new APIResponse<{responseClass}>(response.HTTPStatusCode.Value);";
+                        methodBody += $"return new APIResponse<{responseClass}>(response.StatusCode);";
                     }
                     else
                     {
                         var specialData = string.IsNullOrWhiteSpace(response.Schema.Type) ? RefToClass(response.Schema.Ref) : ClassNameNormaliser(response.Schema.Type);
-                        methodBody += $@"var data = JsonConvert.DeserializeObject<{specialData}>(response.Data);
-return new APIResponse<{responseClass}>(data: data, statusCode: response.HTTPStatusCode.Value);";
+                        methodBody += $@"var data = JsonConvert.DeserializeObject<{specialData}>(await response.Content.ReadAsStringAsync());
+return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusCode);";
                     }
                 }
 
@@ -349,7 +384,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.HTTPSta
 
             methodBody += $@"default:
          {{
-             return new APIResponse<{responseClass}>(response.HTTPStatusCode.Value);
+             return new APIResponse<{responseClass}>(response.StatusCode);
          }}
  }}
 }}";
@@ -364,6 +399,11 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.HTTPSta
             while (ArrayClassCleaner.IsMatch(result))
             {
                 result = ArrayClassCleaner.Replace(result, "Of${class}");
+            }
+
+            if (result.Equals("object", StringComparison.OrdinalIgnoreCase))
+            {
+                return "object";
             }
 
             return result;
@@ -470,7 +510,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.HTTPSta
 
         private static PropertyDeclarationSyntax Property(string name, string type) => SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(ClassNameNormaliser(type)), name)
                                                     .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .AddAccessorListAccessors(SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
+                                                    .AddAccessorListAccessors(SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)),
                                                                         SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)));
 
         private static string RefToClass(string @ref) => @ref.Substring(@ref.IndexOf('/', 2) + 1);
@@ -528,7 +568,12 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.HTTPSta
         public Configuration()
         {
             Namespace = "nSwagger";
+            AddRefactoringEssentialsPartialClassSupression = true;
         }
+
+        public bool AddRefactoringEssentialsPartialClassSupression { get; set; }
+
+        public TimeSpan HTTPTimeout { get; set; }
 
         public string Namespace { get; set; }
 

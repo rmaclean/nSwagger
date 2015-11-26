@@ -42,7 +42,7 @@
                 {
                     //uri
                     var result = await HTTP.HTTP.GetStreamAsync(uri);
-                    if (!result.HTTPStatusCode.HasValue || result.HTTPStatusCode.Value != System.Net.HttpStatusCode.OK)
+                    if (result == null)
                     {
                         throw new nSwaggerException("Unable to get Swagger defination from URI: " + uri.AbsoluteUri);
                     }
@@ -50,7 +50,7 @@
                     var temp = Path.GetTempFileName();
                     using (var fileStream = new FileStream(temp, FileMode.Create, FileAccess.Write))
                     {
-                        await result.Data.CopyToAsync(fileStream);
+                        await result.CopyToAsync(fileStream);
                     }
 
                     path = temp;

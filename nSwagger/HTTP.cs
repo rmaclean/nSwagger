@@ -1,7 +1,6 @@
 ﻿namespace nSwagger.HTTP
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
     using System.Net;
@@ -9,6 +8,16 @@
     using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
+
+    public class HTTPOptions
+    {
+        public TimeSpan Timeout { get; }
+
+        public HTTPOptions(TimeSpan timeout)
+        {
+            Timeout = timeout;
+        }
+    }
 
     public static class HTTP
     {
@@ -36,191 +45,90 @@
             return client;
         }
 
-        public static async Task<HTTPResponse<string>> DeleteStringAsync(Uri uri, int attempt = -1, string token = null)
-        {
-            attempt++;
-            var response = await DeleteAsync(uri, token);
+        internal static async Task<HttpResponseMessage> PutAsync(Uri uri, HTTPOptions httpOptions, HttpContent content = null, string token = null) => await HTTPCallAsync("put", uri, httpOptions, content, token);
 
-#if DEBUG
-            Debug.WriteLine("URI: " + uri);
-            Debug.WriteLine("Status Code: " + response.StatusCode);
-#endif
+        internal static async Task<HttpResponseMessage> PostAsync(Uri uri, HTTPOptions httpOptions, HttpContent content = null, string token = null) => await HTTPCallAsync("post", uri, httpOptions, content, token);
 
-            if (response != null)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new HTTPResponse<string>(result, response.StatusCode);
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await DeleteStringAsync(uri, attempt, token);
-            }
-
-            return null;
-        }
-
-        public static async Task<HTTPResponse<string>> PostFormAsync(Uri uri, IEnumerable<KeyValuePair<string, string>> values, int attempt = -1, string token = null)
-        {
-            attempt++;
-#if DEBUG
-            Debug.WriteLine("POST:");
-            foreach (var item in values)
-            {
-                Debug.WriteLine("{0} = {1}", item.Key, item.Value);
-            }
-#endif
-            using (var form = new FormUrlEncodedContent(values))
-            {
-                var response = await PostAsync(uri, form, token, "application/x-www-form-urlencoded");
-                if (response != null)
-                {
-                    var result = await response.Content.ReadAsStringAsync();
-                    return new HTTPResponse<string>(result, response.StatusCode);
-                }
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await PostFormAsync(uri, values, attempt, token);
-            }
-
-            return null;
-        }
-
-        public static async Task<HTTPResponse<string>> PutStringAsync(Uri uri, string content = null, int attempt = -1, string token = null)
-        {
-            attempt++;
-            var modifiedContent = string.IsNullOrWhiteSpace(content) ? "" : content;
-            Debug.WriteLine(modifiedContent);
-
-            var response = await PutAsync(uri, new StringContent(modifiedContent), token);
-
-#if DEBUG
-            Debug.WriteLine(uri);
-            if (modifiedContent.GetType() == typeof(StringContent))
-            {
-                Debug.WriteLine(modifiedContent);
-            }
-
-            Debug.WriteLine(await response.Content.ReadAsStringAsync());
-#endif
-
-            if (response != null)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new HTTPResponse<string>(result, response.StatusCode);
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await PutStringAsync(uri, modifiedContent, attempt, token);
-            }
-
-            return null;
-        }
-
-        public static async Task<HTTPResponse<string>> PostStringAsync(Uri uri, string content = null, int attempt = -1, string token = null)
-        {
-            attempt++;
-            var modifiedContent = string.IsNullOrWhiteSpace(content) ? "" : content;
-            Debug.WriteLine(modifiedContent);
-
-            var response = await PostAsync(uri, new StringContent(modifiedContent), token);
-
-#if DEBUG
-            Debug.WriteLine(uri);
-            if (modifiedContent.GetType() == typeof(StringContent))
-            {
-                Debug.WriteLine(modifiedContent);
-            }
-
-            Debug.WriteLine(await response.Content.ReadAsStringAsync());
-#endif
-
-            if (response != null)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new HTTPResponse<string>(result, response.StatusCode);
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await PostStringAsync(uri, modifiedContent, attempt, token);
-            }
-
-            return null;
-        }
-
-        public static async Task<HTTPResponse<object>> PostBoolAsync(Uri uri, string content = null, int attempt = -1, string token = null)
-        {
-            attempt++;
-            var modifiedContent = string.IsNullOrWhiteSpace(content) ? "" : content;
-            Debug.WriteLine(modifiedContent);
-
-            var response = await PostAsync(uri, new StringContent(modifiedContent), token);
-
-#if DEBUG
-            Debug.WriteLine(uri);
-            if (modifiedContent.GetType() == typeof(StringContent))
-            {
-                Debug.WriteLine(modifiedContent);
-            }
-
-            Debug.WriteLine(await response.Content.ReadAsStringAsync());
-#endif
-
-            if (response != null)
-            {
-                return new HTTPResponse<object>(response.IsSuccessStatusCode, response.StatusCode);
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await PostBoolAsync(uri, modifiedContent, attempt, token);
-            }
-
-            return null;
-        }
-
-        private static async Task<HttpResponseMessage> PutAsync(Uri uri, HttpContent content, string token = null, string mediaType = "application/json")
+        private static async Task<HttpResponseMessage> HTTPCallAsync(string method, Uri uri, HTTPOptions options, HttpContent content = null, string token = null)
         {
             using (var client = CreateClient())
             {
-                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2)))
+                using (var cancellationTokenSource = new CancellationTokenSource(options.Timeout))
                 {
                     var errorMessage = string.Empty;
                     try
                     {
-                        content.Headers.ContentType.MediaType = mediaType;
-
                         if (!string.IsNullOrWhiteSpace(token))
                         {
                             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
                         }
 
-                        var response = await client.PutAsync(uri, content, cancellationTokenSource.Token);
-#if DEBUG
-                        Debug.WriteLine(uri);
-                        if (content.GetType() == typeof(StringContent))
+                        var response = default(HttpResponseMessage);
+                        switch (method.ToUpperInvariant())
                         {
-                            Debug.WriteLine(content);
+                            case "DELETE":
+                                {
+                                    response = await client.DeleteAsync(uri, cancellationTokenSource.Token);
+                                    break;
+                                }
+                            case "POST":
+                                {
+                                    response = await client.PostAsync(uri, content, cancellationTokenSource.Token);
+                                    break;
+                                }
+                            case "PUT":
+                                {
+                                    response = await client.PutAsync(uri, content, cancellationTokenSource.Token);
+                                    break;
+                                }
+                            case "GET":
+                                {
+                                    response = await client.GetAsync(uri, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
+                                    break;
+                                }
+                            case "HEAD":
+                                {
+                                    response = await client.SendAsync(new HttpRequestMessage
+                                    {
+                                        Method = new HttpMethod(method),
+                                        RequestUri = uri
+                                    }, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
+
+                                    break;
+                                }
+                            case "OPTIONS":
+                                {
+                                    response = await client.SendAsync(new HttpRequestMessage
+                                    {
+                                        Method = new HttpMethod(method),
+                                        RequestUri = uri
+                                    }, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
+
+                                    break;
+                                }
+                            case "PATCH":
+                                {
+                                    response = await client.SendAsync(new HttpRequestMessage
+                                    {
+                                        Method = new HttpMethod(method),
+                                        RequestUri = uri,
+                                        Content = content
+                                    }, HttpCompletionOption.ResponseContentRead, cancellationTokenSource.Token);
+
+                                    break;
+                                }
                         }
 
-                        Debug.WriteLine(await response.Content.ReadAsStringAsync());
+#if DEBUG
+                        Debug.WriteLine($"HTTP {method} to {uri} returned {await response.Content.ReadAsStringAsync()}");
 #endif
                         return response;
                     }
-                    catch (FileNotFoundException) { errorMessage = "HTTP PUT exception - file not found exception"; /* this can happen if WP cannot resolve the server */ }
-                    catch (WebException) { errorMessage = "HTTP PUT exception - web exception"; }
-                    catch (HttpRequestException) { errorMessage = "HTTP PUT exception - http exception"; }
-                    catch (TaskCanceledException) { errorMessage = "HTTP PUT exception - task cancelled exception"; }
-                    catch (UnauthorizedAccessException) { errorMessage = "HTTP PUT exception - unauth exception"; }
+                    catch (FileNotFoundException) { errorMessage = $"HTTP {method} exception - file not found exception"; /* this can happen if WP cannot resolve the server */ }
+                    catch (WebException) { errorMessage = $"HTTP {method} exception - web exception"; }
+                    catch (HttpRequestException) { errorMessage = $"HTTP {method} exception - http exception"; }
+                    catch (TaskCanceledException) { errorMessage = $"HTTP {method} exception - task cancelled exception"; }
+                    catch (UnauthorizedAccessException) { errorMessage = $"HTTP {method} exception - unauth exception"; }
 
 #if DEBUG
                     Debug.WriteLine(errorMessage);
@@ -231,90 +139,24 @@
             return null;
         }
 
-        private static async Task<HttpResponseMessage> PostAsync(Uri uri, HttpContent content, string token = null, string mediaType = "application/json")
-        {
-            using (var client = CreateClient())
-            {
-                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2)))
-                {
-                    var errorMessage = string.Empty;
-                    try
-                    {
-                        content.Headers.ContentType.MediaType = mediaType;
+        internal static async Task<HttpResponseMessage> HeadAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("head", uri, httpOptions, token: token);
 
-                        if (!string.IsNullOrWhiteSpace(token))
-                        {
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-                        }
+        internal static async Task<HttpResponseMessage> OptionsAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("options", uri, httpOptions, token: token);
 
-                        var response = await client.PostAsync(uri, content, cancellationTokenSource.Token);
-#if DEBUG
-                        Debug.WriteLine(uri);
-                        if (content.GetType() == typeof(StringContent))
-                        {
-                            Debug.WriteLine(content);
-                        }
+        internal static async Task<HttpResponseMessage> PatchAsync(Uri uri, HTTPOptions httpOptions, HttpContent content, string token = null) => await HTTPCallAsync("patch", uri, httpOptions, content, token: token);
 
-                        Debug.WriteLine(await response.Content.ReadAsStringAsync());
-#endif
-                        return response;
-                    }
-                    catch (FileNotFoundException) { errorMessage = "HTTP Post exception - file not found exception"; /* this can happen if WP cannot resolve the server */ }
-                    catch (WebException) { errorMessage = "HTTP Post exception - web exception"; }
-                    catch (HttpRequestException) { errorMessage = "HTTP Post exception - http exception"; }
-                    catch (TaskCanceledException) { errorMessage = "HTTP Post exception - task cancelled exception"; }
-                    catch (UnauthorizedAccessException) { errorMessage = "HTTP Post exception - unauth exception"; }
+        internal static async Task<HttpResponseMessage> DeleteAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("delete", uri, httpOptions, token: token);
 
-#if DEBUG
-                    Debug.WriteLine(errorMessage);
-#endif
-                }
-            }
-
-            return null;
-        }
-
-        private static async Task<HttpResponseMessage> DeleteAsync(Uri uri, string token = null)
-        {
-            using (var client = CreateClient())
-            {
-                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2)))
-                {
-                    var errorMessage = string.Empty;
-                    try
-                    {
-                        if (!string.IsNullOrWhiteSpace(token))
-                        {
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-                        }
-
-                        return await client.DeleteAsync(uri, cancellationTokenSource.Token);
-                    }
-                    catch (FileNotFoundException) { errorMessage = "HTTP DELETE exception - file not found exception"; /* this can happen if WP cannot resolve the server */ }
-                    catch (WebException) { errorMessage = "HTTP DELETE exception - web exception"; }
-                    catch (HttpRequestException) { errorMessage = "HTTP DELETE exception - http exception"; }
-                    catch (TaskCanceledException) { errorMessage = "HTTP DELETE exception - task cancelled exception"; }
-                    catch (UnauthorizedAccessException) { errorMessage = "HTTP DELETE exception - unauth exception"; }
-
-#if DEBUG
-                    Debug.WriteLine(errorMessage);
-#endif
-                }
-            }
-
-            return null;
-        }
-
-        public static async Task<HTTPResponse<Stream>> GetStreamAsync(Uri uri, int attempt = -1)
+        internal static async Task<Stream> GetStreamAsync(Uri uri, int attempt = -1)
         {
             attempt++;
-            var response = await GetAsync(uri);
+            var response = await GetAsync(uri, new HTTPOptions(TimeSpan.FromMinutes(2)));
             Debug.WriteLine("Uri: " + uri);
             if (response != null)
             {
                 Debug.WriteLine("HTTP Status Code: " + response.StatusCode);
                 var result = await response.Content.ReadAsStreamAsync();
-                return new HTTPResponse<Stream>(result, response.StatusCode);
+                return result;
             }
 
             if (attempt < 3)
@@ -326,73 +168,7 @@
             return null;
         }
 
-        public static async Task<HTTPResponse<string>> GetStringAsync(Uri uri, int attempt = -1, string token = null)
-        {
-            attempt++;
-            Debug.WriteLine("Uri: " + uri);
-            var response = await GetAsync(uri, token);
-            if (response != null)
-            {
-                Debug.WriteLine("HTTP Status Code: " + response.StatusCode);
-                var result = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine("Response: " + result);
-                return new HTTPResponse<string>(result, response.StatusCode);
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await GetStringAsync(uri, attempt, token);
-            }
-
-            return null;
-        }
-
-        private static async Task<HttpResponseMessage> GetAsync(Uri uri, string token = null)
-        {
-            using (var client = CreateClient())
-            {
-                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(2)))
-                {
-                    var errorMessage = string.Empty;
-                    try
-                    {
-                        if (!string.IsNullOrWhiteSpace(token))
-                        {
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
-                        }
-
-                        return await client.GetAsync(uri, cancellationTokenSource.Token);
-                    }
-                    catch (WebException) { errorMessage = "HTTP Get exception - web exception"; }
-                    catch (HttpRequestException) { errorMessage = "HTTP Get exception - http exception"; }
-                    catch (TaskCanceledException) { errorMessage = "HTTP Get exception - task exception"; }
-                    catch (UnauthorizedAccessException) { errorMessage = "HTTP Get exception - un auth exception"; }
-#if DEBUG
-                    Debug.WriteLine(errorMessage);
-#endif
-                }
-            }
-
-            return null;
-        }
-    }
-
-    public class HTTPResponse<T>
-    {
-        public HTTPResponse(T data, HttpStatusCode statusCode) : this(statusCode)
-        {
-            Data = data;
-        }
-
-        public HTTPResponse(HttpStatusCode statusCode)
-        {
-            HTTPStatusCode = statusCode;
-        }
-
-        public T Data { get; }
-
-        public HttpStatusCode? HTTPStatusCode { get; }
+        internal static async Task<HttpResponseMessage> GetAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("get", uri, httpOptions, token: token);
     }
 
     public class APIResponse<T>
@@ -408,11 +184,14 @@
             SuccessDataAvailable = true;
         }
 
-        public APIResponse()
+        public bool Success { get; }
+
+        public APIResponse(bool success)
         {
+            Success = success;
         }
 
-        public APIResponse(HttpStatusCode statusCode) : this()
+        public APIResponse(HttpStatusCode statusCode) : this((int)statusCode >= 200 && (int)statusCode <= 299)
         {
             HTTPStatusCode = statusCode;
         }

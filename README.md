@@ -10,7 +10,6 @@ Currently this library works for most simple specifications and produces code th
 ## Console 
 
 The first client for the core library is a console application which you can run and produce the code from the Swagger files.  
-Currently this exists but isn't really usable yet.
 
 ## Visual Studio Integration
 
@@ -18,14 +17,19 @@ The second client is to add an extension to Visual Studio, the goal of this is t
 
 ## Limitations
 
+These are items we plan on resolving asap.
+
+###Stability of generated code
+As we figure out the right structures the generated code may change between values.
+
 ###JSON only
 The endpoint must support JSON, as this is all that is supported by the library.
 
-###Not support for HEAD, OPTIONS &amp; PATCH
-The only HTTP methods currently supported are POST, PUT, DELETE and GET. Swagger makes allowance for HEAD, OPTIONS and PATCH too and we still need to add those in.
-
 ###Validation
 The Swagger defination provides a LOT of information for validating the data. It would be great to have the data provided to the calls validated client side before the call is made.
+
+###OAuth Only
+The only authentication currently supported is OAuth
 
 # Want to help?
 We would love you help with this project! So please feel free to fork the code and do a pull request!   
