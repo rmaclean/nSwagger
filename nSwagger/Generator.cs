@@ -53,7 +53,7 @@
 
             var baseClass = SyntaxFactory.ClassDeclaration(className)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                .AddMembers(Field("url", "string").AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)), 
+                .AddMembers(Field("url", "string").AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)),
                 Constructor(className, "if (!string.IsNullOrWhiteSpace(url)){ this.url = url;} else { this.url = \"" + spec.Schemes[0] + "://" + spec.Host + "\"; }", new[] { "url", "string", "null" }))
                 .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
@@ -108,23 +108,38 @@
                     var propertyType = "";
                     if (!string.IsNullOrWhiteSpace(property.Type))
                     {
-                        if (property.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
+                        switch (property.Type.ToUpperInvariant())
                         {
-                            var arrayClass = property.ArrayItemType;
-                            if (arrayClass.StartsWith("#/definitions", StringComparison.OrdinalIgnoreCase))
-                            {
-                                arrayClass = RefToClass(arrayClass);
-                            }
-                            else
-                            {
-                                arrayClass = JsonTypeToDotNetType(arrayClass, property.Format);
-                            }
+                            case "ARRAY":
+                                {
+                                    var arrayClass = property.ArrayItemType;
+                                    if (arrayClass.StartsWith("#/definitions", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        arrayClass = RefToClass(arrayClass);
+                                    }
+                                    else
+                                    {
+                                        arrayClass = JsonSchemaToDotNetType(className, property.Name, property);
+                                    }
 
-                            propertyType = arrayClass + "[]";
-                        }
-                        else
-                        {
-                            propertyType = JsonTypeToDotNetType(property.Type, property.Format);
+                                    propertyType = arrayClass + "[]";
+                                    break;
+                                }
+                            case "STRING":
+                                {
+                                    propertyType = JsonSchemaToDotNetType(className, property.Name, property);
+                                    if (IsJsonSchemaEnum(property))
+                                    {
+                                        @class = AddEnum(@class, propertyType, property.Enum);
+                                    }
+
+                                    break;
+                                }
+                            default:
+                                {
+                                    propertyType = JsonSchemaToDotNetType(className, property.Name, property);
+                                    break;
+                                }
                         }
                     }
                     else
@@ -140,6 +155,15 @@
         }
 
         private static ClassDeclarationSyntax AddDefination(ClassDeclarationSyntax baseClass, Defination defination, Configuration config) => AddClass(baseClass, defination.Name, defination.Properties, config);
+
+        private static ClassDeclarationSyntax AddEnum(ClassDeclarationSyntax @class, string enumName, string[] enumValues)
+        {
+            var @enum = SyntaxFactory.EnumDeclaration(enumName)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                .AddMembers(enumValues.Select(_ => SyntaxFactory.EnumMemberDeclaration(_)).ToArray());
+
+            return @class.AddMembers(@enum);
+        }
 
         private static ClassDeclarationSyntax AddOperation(ClassDeclarationSyntax @class, OperationConfig config, Configuration swaggerConfig)
         {
@@ -161,6 +185,20 @@
                     Type = "string"
                 });
             }
+
+            var operationName = config.Operation.OperationId;
+            if (string.IsNullOrWhiteSpace(operationName))
+            {
+                var end = config.Path.IndexOf("/", 2, StringComparison.OrdinalIgnoreCase) - 1;
+                if (end < 0)
+                {
+                    end = config.Path.Length - 1;
+                }
+
+                operationName = config.HTTPAction.ToString() + config.Path.Substring(1, end);
+            }
+
+            var methodName = operationName + "Async";
 
             if (config.Operation.Parameters != null)
             {
@@ -200,26 +238,13 @@
                         {
                             Default = @default,
                             Name = name,
-                            Type = JsonTypeToDotNetType(type, typeFormat),
-                            Location = @param.In
+                            Type = JsonSchemaToDotNetType(type, typeFormat),
+                            Location = @param.In,
+                            Description = @param.Description
                         });
                     }
                 }
             }
-
-            var operationName = config.Operation.OperationId;
-            if (string.IsNullOrWhiteSpace(operationName))
-            {
-                var end = config.Path.IndexOf("/", 2, StringComparison.OrdinalIgnoreCase) - 1;
-                if (end < 0)
-                {
-                    end = config.Path.Length - 1;
-                }
-
-                operationName = config.HTTPAction.ToString() + config.Path.Substring(1, end);
-            }
-
-            operationName += "Async";
 
             var successResponse = config.Operation.Responses.Where(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299).OrderBy(_ => _.HttpStatusCode).First();
             if (successResponse.Schema != null)
@@ -248,7 +273,7 @@
                                 }
                                 else
                                 {
-                                    resultClass = JsonTypeToDotNetType(arrayClass.Type, arrayClass.Format);
+                                    resultClass = JsonSchemaToDotNetType(operationName, "Out", arrayClass);
                                 }
 
                                 responseClass = resultClass + "[]";
@@ -265,7 +290,7 @@
 
             responseClass = ClassNameNormaliser(responseClass);
 
-            var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<APIResponse<{responseClass}>>"), operationName)
+            var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName($"Task<APIResponse<{responseClass}>>"), methodName)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.AsyncKeyword));
 
             if (parameters.Count > 0)
@@ -389,9 +414,37 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
  }}
 }}";
 
-            method = method.AddBodyStatements(SyntaxFactory.ParseStatement(methodBody).NormalizeWhitespace());
+            var xmlComments = new List<SyntaxTrivia>();
+
+            if (!string.IsNullOrWhiteSpace(config.Operation.Summary))
+            {
+                xmlComments.AddRange(AddXmlComment("summary", config.Operation.Summary));
+            }
+
+            if (!string.IsNullOrWhiteSpace(config.Operation.Description))
+            {
+                xmlComments.AddRange(AddXmlComment("remarks", config.Operation.Description));
+            }
+
+            if (!string.IsNullOrWhiteSpace(successResponse.Description))
+            {
+                xmlComments.AddRange(AddXmlComment("returns", successResponse.Description));
+            }
+
+            xmlComments.AddRange(parameters.Select(_ => AddXmlParamComment(_.Name, _.Description)));
+            method = method
+                .AddBodyStatements(SyntaxFactory.ParseStatement(methodBody))
+                .WithLeadingTrivia(SyntaxExtensions.ToSyntaxTriviaList(xmlComments));
+
             return @class.AddMembers(method);
         }
+
+        private static SyntaxTrivia[] AddXmlComment(string tag, string text) => new[] {
+                    SyntaxFactory.Comment($"//<{tag}>"),
+                    SyntaxFactory.Comment($"// {text}"),
+                    SyntaxFactory.Comment($"//</{tag}>")};
+
+        private static SyntaxTrivia AddXmlParamComment(string paramName, string text) => SyntaxFactory.Comment($"//<param name=\"{paramName}\">{text}</param>");
 
         private static string ClassNameNormaliser(string className)
         {
@@ -421,7 +474,9 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
 
         private static PropertyDeclarationSyntax Field(string name, string type) => SyntaxFactory.PropertyDeclaration(SyntaxFactory.ParseTypeName(type), name).AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword)).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
 
-        private static string JsonTypeToDotNetType(string type, string format)
+        private static bool IsJsonSchemaEnum(IJsonSchema schema) => schema.Type.ToUpperInvariant().Equals("STRING") && schema.Enum != null && schema.Enum.Length > 0;
+
+        private static string JsonSchemaToDotNetType(string type, string format)
         {
             switch (type.ToUpperInvariant())
             {
@@ -485,6 +540,16 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             return type;
         }
 
+        private static string JsonSchemaToDotNetType(string parentName, string nodeName, IJsonSchema schema)
+        {
+            if (IsJsonSchemaEnum(schema))
+            {
+                return parentName + nodeName;
+            }
+
+            return JsonSchemaToDotNetType(schema.Type, schema.Format);
+        }
+
         private static ParameterSyntax Parameter(SimplifiedParameter values)
         {
             var param = SyntaxFactory.Parameter(SyntaxFactory.Identifier(values.Name)).WithType(SyntaxFactory.ParseTypeName(values.Type));
@@ -536,6 +601,8 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
         private class SimplifiedParameter
         {
             public string Default { get; set; }
+
+            public string Description { get; internal set; }
 
             public string Location { get; set; }
 

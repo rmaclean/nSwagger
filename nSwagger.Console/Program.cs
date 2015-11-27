@@ -20,6 +20,8 @@
 
         private static int Main(string[] args)
         {
+            args = new[] { "/F", "http://localhost:14446/swagger/docs/v1", "API.cs" };
+
             Console.Title = "nSwagger.Console";
             Console.CursorVisible = false;
             Console.WriteLine("nSwagger.Console");
