@@ -38,7 +38,13 @@
             {
                 var path = "";
                 var uri = default(Uri);
+                var parseAsURL = false;
                 if (Uri.TryCreate(input, UriKind.Absolute, out uri))
+                {
+                    parseAsURL = (uri.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) || uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (parseAsURL)
                 {
                     //uri
                     var result = await HTTP.HTTP.GetStreamAsync(uri);

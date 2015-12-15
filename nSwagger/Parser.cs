@@ -37,7 +37,7 @@
         private static void ParseCommonOtherParameter(OtherParameter item, JToken parameter)
         {
             item.AllowEmptyValue = parameter["allowEmptyValue"]?.Value<bool>() ?? false;
-            item.Required = true;
+            item.Required = parameter["required"]?.Value<bool>() ?? true;
             ParseJsonSchema(item, parameter);
         }
 
@@ -356,7 +356,7 @@
             item.Name = parameter["name"].Value<string>();
             item.In = parameter["in"].Value<string>();
             item.Type = type;
-            item.Required = true;
+            item.Required = parameter["required"]?.Value<bool>() ?? true;
             ParseCommonOtherParameter(item, parameter);
             return item;
         }

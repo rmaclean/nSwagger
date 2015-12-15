@@ -1,5 +1,5 @@
 ﻿namespace nSwagger
-{    
+{
     using nSwagger.Attributes;
 
     public interface IJsonSchema
@@ -35,43 +35,6 @@
         string Type { get; set; }
 
         bool UniqueItems { get; set; }
-    }
-
-    public class Property : IJsonSchema
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public string CollectionFormat { get; set; }
-
-        public string Default { get; set; }
-
-        public string[] Enum { get; set; }
-
-        public bool? ExclusiveMaximum { get; set; }
-
-        public bool? ExclusiveMinimum { get; set; }
-
-        public string Format { get; set; }
-
-        public double? Maximum { get; set; }
-
-        public int? MaxItems { get; set; }
-
-        public int? MaxLength { get; set; }
-
-        public double? Minimum { get; set; }
-
-        public int? MinItems { get; set; }
-
-        public int? MinLength { get; set; }
-
-        public double? MultipleOf { get; set; }
-
-        public string Pattern { get; set; }
-
-        public bool UniqueItems { get; set; }
-        public string Ref { get; internal set; }
-        public string ArrayItemType { get; internal set; }
     }
 
     public class ArrayItems : Item
@@ -206,7 +169,9 @@
         public double? MultipleOf { get; set; }
 
         public string Pattern { get; set; }
+
         public string Ref { get; internal set; }
+
         [Required]
         public string Type { get; set; }
 
@@ -328,6 +293,47 @@
         public Operation Put { get; set; }
     }
 
+    public class Property : IJsonSchema
+    {
+        public string ArrayItemType { get; internal set; }
+
+        public string CollectionFormat { get; set; }
+
+        public string Default { get; set; }
+
+        public string[] Enum { get; set; }
+
+        public bool? ExclusiveMaximum { get; set; }
+
+        public bool? ExclusiveMinimum { get; set; }
+
+        public string Format { get; set; }
+
+        public double? Maximum { get; set; }
+
+        public int? MaxItems { get; set; }
+
+        public int? MaxLength { get; set; }
+
+        public double? Minimum { get; set; }
+
+        public int? MinItems { get; set; }
+
+        public int? MinLength { get; set; }
+
+        public double? MultipleOf { get; set; }
+
+        public string Name { get; set; }
+
+        public string Pattern { get; set; }
+
+        public string Ref { get; internal set; }
+
+        public string Type { get; set; }
+
+        public bool UniqueItems { get; set; }
+    }
+
     public class Response
     {
         [Required]
@@ -387,6 +393,7 @@
         public double? MultipleOf { get; set; }
 
         public string Pattern { get; set; }
+
         public Property[] Properties { get; internal set; }
 
         //todo: get from JSON schema - http://json-schema.org/
@@ -395,7 +402,9 @@
         //properties
         //additionaProperties
         public bool ReadOnly { get; set; }
+
         public string Ref { get; internal set; }
+
         public bool Required { get; set; }
 
         public string Title { get; set; }
@@ -405,7 +414,7 @@
 
         public bool UniqueItems { get; set; }
 
-        public string XML { get; set; } 
+        public string XML { get; set; }
     }
 
     public class Scope
@@ -460,7 +469,9 @@
 
         [Required]
         public Info Info { get; set; }
+
         public Parameter[] Parameters { get; internal set; }
+
         [Required]
         public PathItem[] Paths { get; set; }
 

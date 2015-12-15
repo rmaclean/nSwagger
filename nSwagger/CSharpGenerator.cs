@@ -10,7 +10,7 @@
     using System.Reflection;
     using System.Text.RegularExpressions;
 
-    public static class Generator
+    public static class CSharpGenerator
     {
         private static Regex ArrayClassCleaner = new Regex("(\\[(?<class>.+)])");
 

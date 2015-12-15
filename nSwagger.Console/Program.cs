@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-
+    using System.Threading.Tasks;
     internal class Program
     {
         [Flags]
@@ -15,11 +15,12 @@
             NoTargetFile = 2,
             TargetFileExists = 4,
             Help = 8,
-            Unknown = 16              
+            Unknown = 16,
+            InvalidLanguage = 32
         }
 
         private static int Main(string[] args)
-        {
+        {            
             Console.Title = "nSwagger.Console";
             Console.CursorVisible = false;
             Console.WriteLine("nSwagger.Console");
@@ -30,90 +31,83 @@
                 return (int)ExitCodes.Help;
             }
 
-            var sources = new List<string>();
-            var target = args.Last();
-            var allowOverride = false;
-            var beepWhenDone = false;
-            var @namespace = "";
-            var httpTimeout = 30;
+            var consoleConfig = new ConsoleConfig
+            {
+                Target = args.Last()
+            };
+
             for (var count = 0; count < args.Length - 1; count++)
             {
                 var argument = args[count];
                 if (argument.Equals("/F", StringComparison.OrdinalIgnoreCase))
                 {
-                    allowOverride = true;
+                    consoleConfig.AllowOverride = true;
                     continue;
                 }
 
                 if (argument.Equals("/B", StringComparison.OrdinalIgnoreCase))
                 {
-                    beepWhenDone = true;
+                    consoleConfig.BeepWhenDone = true;
                     continue;
                 }
 
                 if (argument.Equals("/NAMESPACE", StringComparison.OrdinalIgnoreCase))
                 {
                     count++;
-                    @namespace = args[count];
+                    consoleConfig.CustomNamespace = args[count];
+                    continue;
+                }
+
+                if (argument.Equals("/O", StringComparison.OrdinalIgnoreCase))
+                {
+                    count++;
+                    consoleConfig.Language = args[count];
                     continue;
                 }
 
                 if (argument.Equals("/T", StringComparison.OrdinalIgnoreCase))
                 {
                     count++;
-                    httpTimeout = Convert.ToInt32(args[count]);
+                    consoleConfig.HTTPTimeout = Convert.ToInt32(args[count]);
                     continue;
                 }
 
-                sources.Add(argument);
+                consoleConfig.Sources.Add(argument);
             }
 
-            if (sources.Count == 0)
+            var validate = Validate(consoleConfig);
+            if (validate != 0)
             {
-                Console.WriteLine("ERROR: No source files found.");
-                return (int)ExitCodes.NoSourceFiles;
-            }
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                Console.WriteLine("ERROR: No target file found. Note, it must be the last parameter");
-                return (int)ExitCodes.NoTargetFile;
-            }
-
-            if (File.Exists(target))
-            {
-                if (!allowOverride)
-                {
-                    Console.WriteLine("ERROR: Target file already exists and cannot be overwritten.");
-                    return (int)ExitCodes.TargetFileExists;
-                }
-
-                File.Delete(target);
+                return validate;
             }
 
             try
             {
-                var engine = Engine.Run(sources.ToArray());
+                var engine = Engine.Run(consoleConfig.Sources.ToArray());
                 engine.Wait();
 
-                var config = new Configuration
+                var swaggerConfig = new Configuration
                 {
-                    HTTPTimeout = TimeSpan.FromSeconds(httpTimeout)                    
+                    HTTPTimeout = TimeSpan.FromSeconds(consoleConfig.HTTPTimeout)
                 };
 
-                if (!string.IsNullOrWhiteSpace(@namespace))
+                if (!string.IsNullOrWhiteSpace(consoleConfig.CustomNamespace))
                 {
-                    config.Namespace = @namespace;
+                    swaggerConfig.Namespace = consoleConfig.CustomNamespace;
                 }
 
-                var ns = Generator.Begin(config);
-                foreach (var spec in engine.Result)
+                if (consoleConfig.Language.Equals("c#", StringComparison.OrdinalIgnoreCase))
                 {
-                    ns = Generator.Go(ns, config, spec);
+                    CSharpProcess(engine.Result, swaggerConfig, consoleConfig.Target);
                 }
 
-                Generator.End(config, ns, target);
-                if (beepWhenDone)
+                if (consoleConfig.Language.Equals("typescript", StringComparison.OrdinalIgnoreCase))
+                {
+                    var generator = new TypeScriptGenerator();
+                    generator.Run(engine.Result, swaggerConfig, consoleConfig.Target);
+                }
+
+                if (consoleConfig.BeepWhenDone)
                 {
                     Console.Beep();
                 }
@@ -124,25 +118,37 @@
                 return (int)ExitCodes.Unknown;
             }
 
-            Console.WriteLine("Finished producing code: " + target);
+            Console.WriteLine("Finished producing code: " + consoleConfig.Target);
             Console.CursorVisible = true;
             return (int)ExitCodes.Success;
+        }
+
+        private static void CSharpProcess(Specification[] specifications, Configuration swaggerConfig, string target)
+        {
+            var ns = CSharpGenerator.Begin(swaggerConfig);
+            foreach (var spec in specifications)
+            {
+                ns = CSharpGenerator.Go(ns, swaggerConfig, spec);
+            }
+
+            CSharpGenerator.End(swaggerConfig, ns, target);
         }
 
         private static void ShowHelp()
         {
             Console.WriteLine("Takes one or more Swagger specifications and produces a C# output.");
             Console.WriteLine();
-            Console.WriteLine("nSwagger.Console.exe [/F] [/B] [/NAMESPACE namespace] [/T httptimeout] sources target");
+            Console.WriteLine("nSwagger.Console.exe [/O language] [/F] [/B] [/NAMESPACE namespace] [/T httptimeout] source target");
             Console.WriteLine();
             var messages = new Dictionary<string, string>
             {
-                { "source", "One or more, space seperated, paths to Swagger definations. The paths can exist on disk or be a URL." },
-                { "target", "The target to write the C# output to. NOTE: This MUST be last." },
+                { "/O language", "Select the type output to generate. `language` can be `C#` (default) or `TypeScript` to generate TypeScript interfaces and definations." },
                 { "/F", "Force override of the target if it already exists." },
                 { "/B", "Beep when done." },
-                { "/NAMESPACE", "The namespace for the target file to use.The namespace for the target file to use." },
-                { "/T", "The HTTP timeout to use in API calls in seconds. Default is 30 secs" }
+                { "/NAMESPACE", "For C# this is the namespace for the target file to use. For TypeScript this is the module name. Detault is nSwagger" },
+                { "/T", "The HTTP timeout to use in API calls in seconds. Only used with C#. Default is 30 secs" },
+                { "source", "One or more, space seperated, paths to Swagger definations. The paths can exist on disk or be a URL." },
+                { "target", "The target to write the C# output to. NOTE: This MUST be last." }
             };
 
             WriteAlignedMessages(messages);
@@ -156,6 +162,40 @@
             };
 
             WriteAlignedMessages(examples, 4);
+        }
+
+        private static int Validate(ConsoleConfig config)
+        {
+            if (config.Sources.Count == 0)
+            {
+                Console.WriteLine("ERROR: No source files found.");
+                return (int)ExitCodes.NoSourceFiles;
+            }
+
+            if (!config.Language.Equals("c#", StringComparison.OrdinalIgnoreCase) && !config.Language.Equals("typescript", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine("ERROR: Invalid language choosen. It must be 'c#' or 'TypeScript'.");
+                return (int)ExitCodes.InvalidLanguage;
+            }
+
+            if (string.IsNullOrWhiteSpace(config.Target))
+            {
+                Console.WriteLine("ERROR: No target file found. Note, it must be the last parameter");
+                return (int)ExitCodes.NoTargetFile;
+            }
+
+            if (File.Exists(config.Target))
+            {
+                if (!config.AllowOverride)
+                {
+                    Console.WriteLine("ERROR: Target file already exists and cannot be overwritten.");
+                    return (int)ExitCodes.TargetFileExists;
+                }
+
+                File.Delete(config.Target);
+            }
+
+            return 0;
         }
 
         private static void WriteAlignedMessages(Dictionary<string, string> messages, int keyOffset = 2)
@@ -196,13 +236,20 @@
             Console.CursorLeft = 0;
         }
 
-        private static void WriteMessage(int offset, string message)
+        private class ConsoleConfig
         {
-            var fits = Console.WindowWidth >= offset + message.Length;
-            if (fits)
-            {
-                return;
-            }
+            public bool AllowOverride { get; set; }
+
+            public bool BeepWhenDone { get; set; }
+
+            public string Language { get; set; } = "c#";
+
+            public int HTTPTimeout { get; set; } = 30;
+
+            public List<string> Sources { get; } = new List<string>();
+
+            public string Target { get; set; }
+            public string CustomNamespace { get; internal set; }
         }
     }
 }

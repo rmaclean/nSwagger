@@ -1,0 +1,22 @@
+﻿<Window x:Class="nSwagger.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:nSwagger.GUI"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False,Type=local:MainViewModel}"
+        Title="nSwagger" Width="525" WindowStyle="ToolWindow" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight">
+    <StackPanel>
+        <TextBlock Margin="0,2" Text="URL to Swagger Specification" FontWeight="Bold" />
+        <TextBox Margin="0,2" Text="{Binding Url, Mode=TwoWay}"/>
+        <Button Margin="0,2" HorizontalAlignment="Right" Width="200">Add</Button>
+        <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000"/>
+        <TextBlock Margin="0,2" Text="Options" FontWeight="Bold" />
+        <CheckBox Margin="0,2" Content="Override existing file"/>
+        <TextBlock Margin="0,2" Text="Custom namespace"/>
+        <TextBox Margin="0,2" />
+        <TextBlock Margin="0,2"  Text="Timeout"/>
+        <TextBox Margin="0,2" />
+    </StackPanel>
+</Window>
