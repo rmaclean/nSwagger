@@ -1,11 +1,17 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/691q7f5xj2xbmu7p?svg=true)](https://ci.appveyor.com/project/rmaclean/nswagger)
 
+# Downloads
+[Download Console Application](https://ci.appveyor.com/api/buildjobs/hv3nochf0ve7cua4/artifacts/nSwagger.Console/bin/consoleAppVeyor.zip)  
+[Download WPF Application](https://ci.appveyor.com/api/buildjobs/va8unrgrluc815nf/artifacts/nSwagger.GUI/bin/wpfAppVeyor.zip)
+
 # Welcome to nSwagger
 
 nSwagger is a set of tools for developers who use Microsoft languages (C# & TypeScript) and tools to have an easy experience with APIs which are documented with [Swagger 2.0](http://swagger.io).   
 
 For **C#**, nSwagger offers a codegen tool built using the [Roslyn](https://github.com/dotnet/roslyn) compiler and aims to provide a number of pieces of functionality.  
 For **TypeScript** as there is already a [great JS codegen](https://github.com/wcandillon/swagger-js-codegen) we are focused on generating definations to make it easier to work with from TypeScript.
+
+![Example Image](assets/example.jpg)
 
 ## Core library
 
