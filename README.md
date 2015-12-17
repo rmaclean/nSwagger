@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/691q7f5xj2xbmu7p?svg=true)](https://ci.appveyor.com/project/rmaclean/nswagger)
+
 # Welcome to nSwagger
 
 nSwagger is a set of tools for developers who use Microsoft languages (C# & TypeScript) and tools to have an easy experience with APIs which are documented with [Swagger 2.0](http://swagger.io).   

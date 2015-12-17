@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False,Type=local:MainViewModel}"
-        Title="nSwagger" Width="525" WindowStyle="SingleBorderWindow" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight">
+        Title="nSwagger" Width="525" WindowStyle="SingleBorderWindow" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" Icon="Assets/logo.png">
     <Window.Resources>
         <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter"/>
     </Window.Resources>
@@ -51,7 +51,7 @@
             <TextBox Margin="0,2" Text="{Binding Timeout, Mode=TwoWay}" />
         </StackPanel>
         <Grid Visibility="{Binding Running, Converter={StaticResource booleanToVisibilityConverter}, FallbackValue=Collapsed}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#72000000">
-            <ProgressBar HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="10" Background="{x:Null}" BorderBrush="{x:Null}" IsIndeterminate="True" />
+            <ProgressBar HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="10" Background="{x:Null}" BorderBrush="{x:Null}" IsIndeterminate="True" Foreground="SteelBlue" />
         </Grid>
     </Grid>
 </Window>
