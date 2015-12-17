@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\RequiredAttribute.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="CSharpGenerator.cs" />
     <Compile Include="HTTP.cs">

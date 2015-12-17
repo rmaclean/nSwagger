@@ -1,5 +1,6 @@
 ﻿namespace nSwagger
 {
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -8,10 +9,29 @@
 
     public static class Engine
     {
-        public static async Task<Specification[]> Run(params string[] inputs)
+        public static async Task Run(Configuration config)
+        {
+            Validation(config);
+            var specifications = await GetSpecifications(config);
+            if (config.Language.HasFlag(TargetLanguage.csharp))
+            {
+                foreach (var spec in specifications)
+                {
+                    CSharpGenerator.Run(config, spec);
+                }
+            }
+
+            if (config.Language.HasFlag(TargetLanguage.typescript))
+            {
+                var generator = new TypeScriptGenerator();
+                generator.Run(config, specifications);
+            }
+        }
+
+        private static async Task<Specification[]> GetSpecifications(Configuration config)
         {
             var result = new List<Specification>();
-            var files = await InputsToFiles(inputs);
+            var files = await InputsToFiles(config.Sources);
             foreach (var file in files)
             {
                 try
@@ -24,7 +44,18 @@
                     Debugger.Break();
                     throw ex;
                 }
+            }
 
+            if (config.SaveSettings)
+            {
+                var serialisedSettings = JsonConvert.SerializeObject(config);
+                var settingsFile = config.Target + ".json";
+                if (File.Exists(settingsFile))
+                {
+                    File.Delete(settingsFile);
+                }
+
+                File.WriteAllText(settingsFile, serialisedSettings);
             }
 
             return result.ToArray();
@@ -77,6 +108,29 @@
             }
 
             return files;
+        }
+
+        private static void Validation(Configuration config)
+        {
+            if (config.Sources.Length == 0)
+            {
+                throw new nSwaggerException("No source files found.");
+            }
+
+            if (string.IsNullOrWhiteSpace(config.Target))
+            {
+                throw new nSwaggerException("No target file found. Note, it must be the last parameter");
+            }
+
+            if (File.Exists(config.Target))
+            {
+                if (!config.AllowOverride)
+                {
+                    throw new nSwaggerException("Target file already exists and cannot be overwritten.");
+                }
+
+                File.Delete(config.Target);
+            }
         }
     }
 }

@@ -80,7 +80,7 @@
             return JsonToJSTypeConverter(item.Type);
         }
 
-        public void Run(Specification[] specifications, Configuration swaggerConfig, string target)
+        public void Run(Configuration swaggerConfig, Specification[] specifications)
         {
             existingInterfaces.Add("any");
             var output = new CoderStringBuilder();
@@ -95,7 +95,7 @@
             output.Outdent();
             output.AppendLine("}");
 
-            File.WriteAllText(target, output.ToString());
+            File.WriteAllText(swaggerConfig.Target, output.ToString());
         }
 
         private void AddAPICall(CoderStringBuilder output, Operation operation)
