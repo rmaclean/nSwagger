@@ -49,7 +49,7 @@
             if (config.SaveSettings)
             {
                 var serialisedSettings = JsonConvert.SerializeObject(config);
-                var settingsFile = config.Target + ".json";
+                var settingsFile = config.Target + ".nSwagger";
                 if (File.Exists(settingsFile))
                 {
                     File.Delete(settingsFile);

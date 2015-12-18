@@ -36,8 +36,11 @@
          group as the part of a menu contained between two lines. The parent of a group
          must be a menu. -->
     <Groups>
-      <Group guid="guidAddSwaggerPackageCmdSet" id="MyMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+      <Group guid="guidAddSwaggerPackageCmdSet" id="MyMenuGroup" priority="0x0200">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+      </Group>
+      <Group guid="guidAddSwaggerPackageCmdSet" id="ContextMenuGroup" priority="0x0200">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
       </Group>
     </Groups>
 
@@ -52,11 +55,28 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerId" priority="0x0100" type="Button">
+      <Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerId" priority="0xFFFF" type="Button">
         <Parent guid="guidAddSwaggerPackageCmdSet" id="MyMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
-          <ButtonText>Invoke AddSwagger</ButtonText>
+          <ButtonText>Add Swagger Reference</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerId" priority="0xFFFF" type="Button">
+        <Parent guid="guidAddSwaggerPackageCmdSet" id="ContextMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Add Swagger Reference</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidAddSwaggerPackageCmdSet" id="UpdateSwaggerId" priority="0xFFFF" type="Button">
+        <Parent guid="guidAddSwaggerPackageCmdSet" id="ContextMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <ButtonText>Update Swagger Reference</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -68,7 +88,7 @@
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
-      <Bitmap guid="guidImages" href="Resources\AddSwagger.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
+      <Bitmap guid="guidImages" href="Resources\AddSwagger.png" usedList="bmpPic1"/>
     </Bitmaps>
   </Commands>
 
@@ -80,15 +100,12 @@
     <GuidSymbol name="guidAddSwaggerPackageCmdSet" value="{7e544b70-c042-43d4-a10d-28252f8b82fd}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="AddSwaggerId" value="0x0100" />
+      <IDSymbol name="ContextMenuGroup" value="0x0400" />
+      <IDSymbol name="UpdateSwaggerId" value="0x0410" />
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{8c953bd7-9aab-44c0-bf6b-b53b14bcdc4f}" >
       <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-      <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

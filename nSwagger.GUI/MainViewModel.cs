@@ -157,10 +157,10 @@
                 AddExtension = false,
                 CheckFileExists = true,
                 CheckPathExists = true,
-                DefaultExt = ".json",
+                DefaultExt = ".nSwagger",
                 RestoreDirectory = true,
                 ShowReadOnly = true,
-                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*"
+                Filter = "nSwagger Files (*.nSwagger)|*.nSwagger|All Files (*.*)|*.*"
             };
 
             var result = openFileDialog.ShowDialog();

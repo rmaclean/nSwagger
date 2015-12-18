@@ -1,16 +1,9 @@
 ﻿namespace nSwagger.VS2015
 {
-    using System;
-    using System.ComponentModel.Design;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-    using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.OLE.Interop;
     using Microsoft.VisualStudio.Shell;
-    using Microsoft.VisualStudio.Shell.Interop;
-    using Microsoft.Win32;
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -41,17 +34,6 @@
         /// </summary>
         public const string PackageGuidString = "6090ec9f-332f-4f70-9694-a6e8e301ef12";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AddSwagger"/> class.
-        /// </summary>
-        public AddSwaggerPackage()
-        {
-            // Inside this method you can place any initialization code that does not require
-            // any Visual Studio service because at this point the package object is created but
-            // not sited yet inside Visual Studio environment. The place to do all the other
-            // initialization is the Initialize method.
-        }
-
         #region Package Members
 
         /// <summary>
@@ -61,9 +43,10 @@
         protected override void Initialize()
         {
             AddSwagger.Initialize(this);
+            UpdateSwagger.Initialize(this);
             base.Initialize();
         }
 
-        #endregion
+        #endregion Package Members
     }
 }
