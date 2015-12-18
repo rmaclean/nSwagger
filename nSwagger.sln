@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nSwagger.Console", "nSwagge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nSwagger.VS2015", "nSwagger.VS2015\nSwagger.VS2015.csproj", "{FA43CC1D-EF92-467A-8324-C0D2C3BD9970}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nSwagger.UI", "nSwagger.UI\nSwagger.UI.csproj", "{89EB6F16-74A3-4448-928E-67E54E44489E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nSwagger.GUI", "nSwagger.GUI\nSwagger.GUI.csproj", "{FF12B19F-3D7A-42A1-89F7-DF55244424EB}"
 EndProject
 Global
@@ -42,13 +40,6 @@ Global
 		{FA43CC1D-EF92-467A-8324-C0D2C3BD9970}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA43CC1D-EF92-467A-8324-C0D2C3BD9970}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FA43CC1D-EF92-467A-8324-C0D2C3BD9970}.wpfAppVeyor|Any CPU.ActiveCfg = wpfAppVeyor|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.consoleAppVeyor|Any CPU.ActiveCfg = consoleAppVeyor|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.wpfAppVeyor|Any CPU.ActiveCfg = wpfAppVeyor|Any CPU
-		{89EB6F16-74A3-4448-928E-67E54E44489E}.wpfAppVeyor|Any CPU.Build.0 = wpfAppVeyor|Any CPU
 		{FF12B19F-3D7A-42A1-89F7-DF55244424EB}.consoleAppVeyor|Any CPU.ActiveCfg = consoleAppVeyor|Any CPU
 		{FF12B19F-3D7A-42A1-89F7-DF55244424EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF12B19F-3D7A-42A1-89F7-DF55244424EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
