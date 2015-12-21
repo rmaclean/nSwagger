@@ -1,8 +1,13 @@
 ﻿namespace nSwagger.VS2015
 {
+    using EnvDTE;
+    using EnvDTE80;
+    using GUI;
     using Microsoft.VisualStudio.Shell;
     using System;
+    using System.ComponentModel.Design;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Runtime.InteropServices;
 
     /// <summary>
@@ -33,8 +38,8 @@
         /// AddSwaggerPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "6090ec9f-332f-4f70-9694-a6e8e301ef12";
-
-        #region Package Members
+        public static readonly Guid CommandSet = new Guid("7e544b70-c042-43d4-a10d-28252f8b82fd");
+        private DTE2 _dte;
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -42,11 +47,52 @@
         /// </summary>
         protected override void Initialize()
         {
-            AddSwagger.Initialize(this);
-            UpdateSwagger.Initialize(this);
             base.Initialize();
+            _dte = GetService(typeof(DTE)) as DTE2;
+            var commandService = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (commandService == null)
+            {
+                return;
+            }
+
+            {
+                //add command
+                var menuCommandID = new CommandID(CommandSet, 0x1020);
+                var menuItem = new MenuCommand(AddSwaggerCommand, menuCommandID);
+                commandService.AddCommand(menuItem);
+            }
+
+            {
+                //update command
+                var menuCommandID = new CommandID(CommandSet, 0x1030);
+                var menuItem = new OleMenuCommand(UpdateSwaggerCommand, menuCommandID);
+                menuItem.BeforeQueryStatus += UpdateItem_BeforeQueryStatus;
+                commandService.AddCommand(menuItem);
+            }
         }
 
-        #endregion Package Members
+        private void UpdateItem_BeforeQueryStatus(object sender, EventArgs e)
+        {
+            System.Diagnostics.Debugger.Break();
+        }
+
+        private void UpdateSwaggerCommand(object sender, EventArgs e)
+        {
+            var project = VsHelpers.GetActiveProject(_dte);           
+        }
+
+        private void AddSwaggerCommand(object sender, EventArgs e)
+        {
+            var project = VsHelpers.GetActiveProject(_dte);
+            var uiOptions = new UIOptions
+            {
+                Overwrite = true
+            };
+
+            uiOptions.Target = Path.Combine(Path.GetDirectoryName(project.FullName), "api.cs");
+            var window = new MainWindow();
+            window.SetUI(uiOptions);
+            window.ShowDialog();
+        }
     }
 }

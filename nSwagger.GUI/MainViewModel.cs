@@ -30,6 +30,7 @@
             BrowseForTarget = new Command(BrowseForTargetExecute);
             SaveSettings = true;
             LoadSettings = new Command(LoadSettingsExecute);
+            Language = Languages[0];
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

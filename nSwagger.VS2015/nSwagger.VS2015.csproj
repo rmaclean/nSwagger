@@ -13,7 +13,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'wpfAppVeyor|AnyCPU'">
     <OutputPath>bin\wpfAppVeyor\</OutputPath>
@@ -70,14 +70,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="UpdateSwagger.cs" />
-    <Compile Include="AddSwagger.cs" />
+    <Compile Include="Helpers\ProjectHelpers.cs" />
+    <None Include="NOTICE" />
     <Compile Include="AddSwaggerPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Key.snk" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -209,6 +208,10 @@
     <ProjectReference Include="..\nSwagger.GUI\nSwagger.GUI.csproj">
       <Project>{ff12b19f-3d7a-42a1-89f7-df55244424eb}</Project>
       <Name>nSwagger.GUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\nSwagger\nSwagger.csproj">
+      <Project>{96c007fc-5349-4919-88b9-02a7801952b3}</Project>
+      <Name>nSwagger</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

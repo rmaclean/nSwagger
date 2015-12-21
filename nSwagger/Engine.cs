@@ -117,12 +117,12 @@
                 throw new nSwaggerException("No source files found.");
             }
 
-            if (string.IsNullOrWhiteSpace(config.Target))
+            if (!config.DoNotWriteTargetFile && string.IsNullOrWhiteSpace(config.Target))
             {
                 throw new nSwaggerException("No target file found. Note, it must be the last parameter");
             }
 
-            if (File.Exists(config.Target))
+            if (!config.DoNotWriteTargetFile && File.Exists(config.Target))
             {
                 if (!config.AllowOverride)
                 {

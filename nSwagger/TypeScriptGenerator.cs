@@ -95,7 +95,10 @@
             output.Outdent();
             output.AppendLine("}");
 
-            File.WriteAllText(swaggerConfig.Target, output.ToString());
+            if (!swaggerConfig.DoNotWriteTargetFile)
+            {
+                File.WriteAllText(swaggerConfig.Target, output.ToString());
+            }
         }
 
         private void AddAPICall(CoderStringBuilder output, Operation operation)
