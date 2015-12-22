@@ -38,6 +38,7 @@
         /// AddSwaggerPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "6090ec9f-332f-4f70-9694-a6e8e301ef12";
+
         public static readonly Guid CommandSet = new Guid("7e544b70-c042-43d4-a10d-28252f8b82fd");
         private DTE2 _dte;
 
@@ -71,16 +72,6 @@
             }
         }
 
-        private void UpdateItem_BeforeQueryStatus(object sender, EventArgs e)
-        {
-            System.Diagnostics.Debugger.Break();
-        }
-
-        private void UpdateSwaggerCommand(object sender, EventArgs e)
-        {
-            var project = VsHelpers.GetActiveProject(_dte);           
-        }
-
         private void AddSwaggerCommand(object sender, EventArgs e)
         {
             var project = VsHelpers.GetActiveProject(_dte);
@@ -93,6 +84,16 @@
             var window = new MainWindow();
             window.SetUI(uiOptions);
             window.ShowDialog();
+        }
+
+        private void UpdateItem_BeforeQueryStatus(object sender, EventArgs e)
+        {
+            System.Diagnostics.Debugger.Break();
+        }
+
+        private void UpdateSwaggerCommand(object sender, EventArgs e)
+        {
+            var project = VsHelpers.GetActiveProject(_dte);
         }
     }
 }

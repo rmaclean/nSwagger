@@ -144,7 +144,7 @@ URL: {Url}";
         [Required]
         public string Version { get; set; }
 
-        public override string ToString()=>  $@"Title: {Title}
+        public override string ToString() => $@"Title: {Title}
 Version: {Version}
 Description: {Description}
 License: {License}
@@ -313,7 +313,7 @@ In: {In}";
         public override string ToString()
         {
             var result = $@"Path: {Path}
-Parameters: {Parameters?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", ":"") + next)}
+Parameters: {Parameters?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next)}
 ";
             if (Delete != null)
             {

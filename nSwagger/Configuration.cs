@@ -23,6 +23,8 @@
 
         public bool AllowOverride { get; set; }
 
+        public bool DoNotWriteTargetFile { get; set; }
+
         public string HTTPCSPath { get; set; }
 
         public TimeSpan HTTPTimeout { get; set; } = TimeSpan.FromSeconds(30);
@@ -38,8 +40,5 @@
         public string[] Sources { get; set; }
 
         public string Target { get; set; }
-
-        public bool DoNotWriteTargetFile { get; set; }
     }
-
 }

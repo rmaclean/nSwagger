@@ -1,11 +1,10 @@
-﻿
-namespace nSwagger
+﻿namespace nSwagger
 {
     using System;
+
     [Serializable]
     public class nSwaggerException : Exception
     {
-     
         public nSwaggerException(string message) : base(message)
         {
         }

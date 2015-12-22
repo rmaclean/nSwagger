@@ -7,7 +7,6 @@
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Windows;
-    using System.Windows.Controls;
     using System.Windows.Input;
 
     public class MainViewModel : INotifyPropertyChanged
@@ -20,8 +19,6 @@
         private string _target;
         private string _timeout;
         private string _url;
-
-        public string[] Languages { get; } = new[] { "C# (client code for API)", "TypeScript (TypeScript definations for API)" };
 
         public MainViewModel()
         {
@@ -74,6 +71,8 @@
                 UpdateProperty(ref _language, value);
             }
         }
+
+        public string[] Languages { get; } = new[] { "C# (client code for API)", "TypeScript (TypeScript definations for API)" };
 
         public ICommand LoadSettings { get; }
 
@@ -290,7 +289,6 @@
             Running = true;
             try
             {
-
                 var timeout = 0;
                 if (!string.IsNullOrWhiteSpace(Timeout) && int.TryParse(Timeout, out timeout))
                 {

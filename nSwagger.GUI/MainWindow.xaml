@@ -9,7 +9,7 @@
         d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False,Type=local:MainViewModel}"
         Title="nSwagger" Width="525" WindowStyle="SingleBorderWindow" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" Icon="Assets/logo.png">
     <Window.Resources>
-        <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter"/>
+        <controls:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
     </Window.Resources>
     <Grid>
         <StackPanel Margin="8">
@@ -18,36 +18,36 @@
             <TextBlock Margin="0,2" Text="URL or path to Swagger Specification" FontWeight="Bold" />
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="28"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="28" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="0,2,5,2" Text="{Binding Url, Mode=TwoWay}"/>
+                <TextBox Grid.Column="0" Margin="0,2,5,2" Text="{Binding Url, Mode=TwoWay}" />
                 <Button Grid.Column="1" Margin="0,2" Command="{Binding BrowseForFile}">
-                    <Image Source="Assets/Folder-Open-01.png" Width="16"/>
+                    <Image Source="Assets/Folder-Open-01.png" Width="16" />
                 </Button>
             </Grid>
             <TextBlock Margin="0,2" Text="Target File Name" FontWeight="Bold" />
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="28"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="28" />
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Margin="0,2,5,2" Text="{Binding Target, Mode=TwoWay}"/>
+                <TextBox Grid.Column="0" Margin="0,2,5,2" Text="{Binding Target, Mode=TwoWay}" />
                 <Button Grid.Column="1" Margin="0,2" Command="{Binding BrowseForTarget}">
-                    <Image Source="Assets/Folder-Open-01.png" Width="16"/>
+                    <Image Source="Assets/Folder-Open-01.png" Width="16" />
                 </Button>
             </Grid>
             <Button Margin="0,2" HorizontalAlignment="Right" Width="200" Command="{Binding Run}">Run</Button>
-            <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000"/>
+            <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000" />
             <TextBlock Margin="0,2" Text="Options" FontWeight="Bold" />
-            <CheckBox Margin="0,2" Content="Save settings" IsChecked="{Binding SaveSettings, Mode=TwoWay}"/>
+            <CheckBox Margin="0,2" Content="Save settings" IsChecked="{Binding SaveSettings, Mode=TwoWay}" />
             <Button Command="{Binding LoadSettings}" Width="200" HorizontalAlignment="Left">Load Settings</Button>
-            <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000"/>
+            <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000" />
             <TextBlock Margin="0,2" Text="Options" FontWeight="Bold" />
-            <CheckBox Margin="0,2" Content="Override existing file" IsChecked="{Binding AllowOverride, Mode=TwoWay}"/>
-            <TextBlock Margin="0,2" Text="Custom namespace"/>
-            <TextBox Margin="0,2" Text="{Binding CustomNamespace, Mode=TwoWay}"/>
-            <TextBlock Margin="0,2"  Text="HTTP Timeout for C# generated code"/>
+            <CheckBox Margin="0,2" Content="Override existing file" IsChecked="{Binding AllowOverride, Mode=TwoWay}" />
+            <TextBlock Margin="0,2" Text="Custom namespace" />
+            <TextBox Margin="0,2" Text="{Binding CustomNamespace, Mode=TwoWay}" />
+            <TextBlock Margin="0,2"  Text="HTTP Timeout for C# generated code" />
             <TextBox Margin="0,2" Text="{Binding Timeout, Mode=TwoWay}" />
         </StackPanel>
         <Grid Visibility="{Binding Running, Converter={StaticResource booleanToVisibilityConverter}, FallbackValue=Collapsed}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#72000000">
