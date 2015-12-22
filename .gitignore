@@ -213,3 +213,12 @@ ModelManifest.xml
 /tests/message.json
 /tests/group.json
 /tests/calendar.json
+/examples/TS-Examples/message.ts
+/examples/TS-Examples/group.ts
+/examples/TS-Examples/calendar.ts
+/examples/C#-Examples/message.cs
+/examples/C#-Examples/group.cs
+/examples/C#-Examples/calendar.cs
+/examples/message.json
+/examples/group.json
+/examples/calendar.json

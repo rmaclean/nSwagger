@@ -8,64 +8,22 @@
 
     public class Program
     {
+        private static string SolutionRoot;
+
         public static void Main()
         {
             Console.Title = "Testing nSwagger";
-            var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..\\..\\..\\tests\\");
+            SolutionRoot = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\");
+            var path = Path.Combine(SolutionRoot, "examples");
             var files = Directory.GetFiles(path);
             var config = new Configuration
             {
                 Language = TargetLanguage.csharp,
-                SaveSettings = false
+                AllowOverride = true
             };
 
-            TextCSharp(files, config);
+            TestCSharp(files, config);
             TestTypeScript(files, config);
-        }
-
-        private static void TestTypeScript(string[] files, Configuration config)
-        {
-            WriteLine("Testing TypeScript Definations: ", ConsoleColor.Cyan);
-            var tsc = @"C:\Users\v-robmc\AppData\Roaming\npm\tsc.cmd";
-            var testAgainstTypeScriptCompiler = File.Exists(tsc);
-            config.Language = TargetLanguage.typescript;
-            config.DoNotWriteTargetFile = false;
-            foreach (var file in files)
-            {
-                WriteLine($"\tTesting against {Path.GetFileName(file)}", ConsoleColor.White);
-                config.Sources = new[] { file };
-                config.Target = Path.GetTempFileName() + ".ts";
-                Console.WriteLine($"\tOutput to {config.Target}");
-                Engine.Run(config).Wait();
-                if (testAgainstTypeScriptCompiler)
-                {
-                    RunCompiler(config, tsc);
-                }
-
-                Console.WriteLine();
-            }
-        }
-
-        private static void RunCompiler(Configuration config, string command, Func<string,string> errorFilter = null, params string[] args)
-        {
-            var arguments = "";
-            if (args.Any())
-            {
-                arguments = args.Aggregate((curr, next) => curr + " " + next) + " ";
-            }
-
-            arguments += config.Target;
-
-            var processInfo = new ProcessStartInfo(command, arguments);
-            processInfo.UseShellExecute = false;
-            processInfo.RedirectStandardOutput = true;
-
-            using (var process = Process.Start(processInfo))
-            {
-                var result = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-                WriteError(result, errorFilter);
-            }
         }
 
         private static string KnownCSharpErrors(string input)
@@ -101,28 +59,86 @@
             return input;
         }
 
-        private static void TextCSharp(string[] files, Configuration config)
+        private static void RunCompiler(Configuration config, string command, Func<string, string> errorFilter = null, params string[] args)
         {
-            WriteLine("Testing C# Client Libraries: ", ConsoleColor.Green);
-            var csc = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\packages\Microsoft.Net.Compilers.1.1.1\tools\csc.exe");
-            var testAgainstCSharpCompiler = File.Exists(csc);
-            foreach (var file in files)
+            var arguments = "";
+            if (args.Any())
+            {
+                arguments = args.Aggregate((curr, next) => curr + " " + next) + " ";
+            }
+
+            arguments += config.Target;
+
+            var processInfo = new ProcessStartInfo(command, arguments);
+            processInfo.UseShellExecute = false;
+            processInfo.RedirectStandardOutput = true;
+
+            using (var process = Process.Start(processInfo))
+            {
+                var result = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                WriteError(result, errorFilter);
+            }
+        }
+
+        private static void TestAgainst(TestAgainstConfig config)
+        {
+            var fullExamplePath = Path.Combine(SolutionRoot + config.ExamplesDirectory);
+            WriteLine(config.Title, ConsoleColor.Green);
+            var testAgainstCompiler = File.Exists(config.CompilerPath);
+            foreach (var file in config.Files)
             {
                 WriteLine($"\tTesting against {Path.GetFileName(file)}", ConsoleColor.White);
-                config.Sources = new[] { file };
-                config.Target = Path.GetTempFileName() + ".cs";
-                Console.WriteLine($"\tOutput to {config.Target}");
-                Engine.Run(config).Wait();
-                if (testAgainstCSharpCompiler)
+                config.Config.Sources = new[] { file };
+                config.Config.Target = Path.Combine(fullExamplePath + Path.GetFileNameWithoutExtension(file) + config.Extension);
+                config.Config.Language = config.Language;
+                Console.WriteLine($"\tOutput to {config.Config.Target}");
+                Engine.Run(config.Config).Wait();
+                if (testAgainstCompiler)
                 {
-                    RunCompiler(config, csc, KnownCSharpErrors, "/nologo");
+                    RunCompiler(config.Config, config.CompilerPath, config.ErrorFilter, config.CompilerArguments);
                 }
 
                 Console.WriteLine();
             }
         }
 
-        private static void WriteError(string error, Func<string,string> filter = null)
+        private static void TestCSharp(string[] files, Configuration config)
+        {
+            var testConfig = new TestAgainstConfig
+            {
+                Files = files,
+                Config = config,
+                CompilerArguments = new[] { "/nologo" },
+                CompilerPath = Path.Combine(SolutionRoot, @"packages\Microsoft.Net.Compilers.1.1.1\tools\csc.exe"),
+                ErrorFilter = KnownCSharpErrors,
+                ExamplesDirectory = @"examples\C#-Examples\",
+                Extension = ".cs",
+                Language = TargetLanguage.csharp,
+                Title = "Testing C# Client Libraries: "
+            };
+
+            TestAgainst(testConfig);
+        }
+
+        private static void TestTypeScript(string[] files, Configuration config)
+        {
+            var testConfig = new TestAgainstConfig
+            {
+                Files = files,
+                Config = config,
+                CompilerArguments = new[] { "--noEmit" },
+                CompilerPath = @"C:\Users\v-robmc\AppData\Roaming\npm\tsc.cmd",
+                ExamplesDirectory = @"examples\TS-Examples\",
+                Extension = ".ts",
+                Language = TargetLanguage.typescript,
+                Title = "Testing TypeScript Definations: "
+            };
+
+            TestAgainst(testConfig);
+        }
+
+        private static void WriteError(string error, Func<string, string> filter = null)
         {
             if (string.IsNullOrWhiteSpace(error))
             {
@@ -162,5 +178,26 @@
             Console.WriteLine(message);
             Console.ForegroundColor = preColour;
         }
+    }
+
+    internal class TestAgainstConfig
+    {
+        public string[] CompilerArguments { get; set; }
+
+        public string CompilerPath { get; set; }
+
+        public Configuration Config { get; set; }
+
+        public Func<string, string> ErrorFilter { get; set; }
+
+        public string ExamplesDirectory { get; set; }
+
+        public string Extension { get; set; }
+
+        public string[] Files { get; set; }
+
+        public TargetLanguage Language { get; set; }
+
+        public string Title { get; set; }
     }
 }

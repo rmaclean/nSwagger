@@ -1,5 +1,7 @@
 ﻿namespace nSwagger
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using System;
     using System.IO;
     using System.Reflection;
@@ -29,6 +31,7 @@
 
         public TimeSpan HTTPTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
+        [JsonConverter(typeof(StringEnumConverter))]
         public TargetLanguage Language { get; set; }
 
         public string Namespace { get; set; } = "nSwagger";
