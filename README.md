@@ -1,8 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/691q7f5xj2xbmu7p?svg=true)](https://ci.appveyor.com/project/rmaclean/nswagger)
 
-# Downloads
-[Download Console Application](https://ci.appveyor.com/api/buildjobs/hv3nochf0ve7cua4/artifacts/nSwagger.Console/bin/consoleAppVeyor.zip)  
-[Download WPF Application](https://ci.appveyor.com/api/buildjobs/va8unrgrluc815nf/artifacts/nSwagger.GUI/bin/wpfAppVeyor.zip)
+# Latest Download
+You can get the latest WPF &amp; console client downloads (&amp; all historic ones too) in **[Releases](https://github.com/rmaclean/nSwagger/releases)**.
 
 # Welcome to nSwagger
 
