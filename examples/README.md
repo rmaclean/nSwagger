@@ -5,4 +5,4 @@ The TypeScript files can be found in [TS-Examples](TS-Examples) and the C# files
 
 A good place to start is with the standard [PetStore](petstore.json) Swagger example, which generated to the following:  
 - [TypeScript Defination](TS-Examples/petstore.ts)  
-- [C# client](C#-Examples/petstore.cs)  
+- [C# client](C%23-Examples/petstore.cs)  
