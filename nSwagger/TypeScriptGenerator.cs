@@ -64,6 +64,7 @@
     {
         private List<string> existingInterfaces = new List<string>();
         private Regex splitOutGeneric = new Regex("(?<generic>\\w+)\\[(?<type>\\w+)]");
+        private Regex whitespace = new Regex("\\s");
 
         public string ItemTypeCleaner(Item item)
         {
@@ -77,7 +78,7 @@
                 return "[]";
             }
 
-            return JsonToJSTypeConverter(item.Type);
+            return CleanClassName(item.Type);
         }
 
         public void Run(Configuration swaggerConfig, Specification[] specifications)
@@ -117,10 +118,10 @@
                     optional = "?";
                 }
 
-                parameters = $"parameters{optional}: {operation.OperationId}Request";
+                parameters = $"parameters{optional}: {CleanClassName(operation.OperationId + "Request")}";
             }
 
-            var operationContent = new StringBuilder(operation.OperationId + "(" + parameters + "): ");
+            var operationContent = new StringBuilder(CleanClassName(operation.OperationId) + "(" + parameters + "): ");
             var success = operation.Responses.FirstOrDefault(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299);
             if (success == null || success.Schema == null)
             {
@@ -160,22 +161,25 @@
 
             output.AppendLine($"export class {name} {{");
             output.Indent();
-            foreach (var property in properties)
+            if (properties != null)
             {
-                var propertyName = property.Name;
-                var propertyType = PropertyTypeCleaner(property);
-                if (property.Enum != null)
+                foreach (var property in properties)
                 {
-                    propertyType = "string";
-                    enums.Add(new EnumInfo
+                    var propertyName = property.Name;
+                    var propertyType = PropertyTypeCleaner(property);
+                    if (property.Enum != null)
                     {
-                        EnumPropertyName = propertyName,
-                        EnumValues = property.Enum,
-                        EnumClassName = name + propertyName
-                    });
-                }
+                        propertyType = "string";
+                        enums.Add(new EnumInfo
+                        {
+                            EnumPropertyName = propertyName,
+                            EnumValues = property.Enum,
+                            EnumClassName = name + propertyName
+                        });
+                    }
 
-                output.AppendLine($"{propertyName}: {propertyType};");
+                    output.AppendLine($"{propertyName}: {propertyType};");
+                }
             }
 
             output.Outdent();
@@ -256,10 +260,14 @@
             output.AppendLine();
         }
 
-        private string CleanClassName(string sourceName) => JsonToJSTypeConverter(sourceName.Replace("[", "").Replace("]", ""));
-
-        private string JsonToJSTypeConverter(string jsonType)
+        private string CleanClassName(string input)
         {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return "";
+            }
+
+            var jsonType = whitespace.Replace(input.Replace("[", "").Replace("]", ""), "");
             if (jsonType.Equals("object", StringComparison.OrdinalIgnoreCase))
             {
                 return "any";
@@ -275,7 +283,7 @@
 
         private void Process(CoderStringBuilder output, Specification specification)
         {
-            output.AppendLine($"export module {specification.Info.Title} {{");
+            output.AppendLine($"export module {CleanClassName(specification.Info.Title)} {{");
             output.Indent();
             foreach (var defination in specification.Definations)
             {
@@ -324,13 +332,23 @@
 
             if (property.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
             {
-                return RefToClass(property.ArrayItemType) + "[]";
+                if (string.IsNullOrWhiteSpace(property.ArrayItemType))
+                {
+                    return "any[]";
+                }
+
+                if (property.ArrayItemType.Contains('/'))
+                {
+                    return RefToClass(property.ArrayItemType) + "[]";
+                }
+
+                return CleanClassName(property.ArrayItemType) + "[]";
             }
 
-            return JsonToJSTypeConverter(property.Type);
+            return CleanClassName(property.Type);
         }
 
-        private string RefToClass(string @ref) => @ref.Substring(@ref.IndexOf("/", 2, StringComparison.Ordinal) + 1);
+        private string RefToClass(string @ref) => CleanClassName(@ref.Substring(@ref.IndexOf("/", 2, StringComparison.Ordinal) + 1));
 
         private string SchemaTypeCleaner(Schema property)
         {

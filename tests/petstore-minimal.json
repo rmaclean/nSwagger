@@ -3,13 +3,13 @@
     "info": {
         "version": "1.0.0",
         "title": "Swagger Petstore",
+        "description": "A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification",
+        "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "Swagger API Team",
-            "url": "http://swagger.io"
+            "name": "Swagger API Team"
         },
         "license": {
-            "name": "Creative Commons 4.0 International",
-            "url": "http://creativecommons.org/licenses/by/4.0/"
+            "name": "MIT"
         }
     },
     "host": "petstore.swagger.io",
@@ -17,30 +17,27 @@
     "schemes": [
         "http"
     ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
     "paths": {
         "/pets": {
             "get": {
-                "tags": [ "Pet Operations" ],
-                "summary": "finds pets in the system",
+                "description": "Returns all pets from the system that the user has access to",
+                "produces": [
+                    "application/json"
+                ],
                 "responses": {
                     "200": {
-                        "description": "pet response",
+                        "description": "A list of pets.",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/Pet"
                             }
-                        },
-                        "headers": {
-                            "x-expires": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "unexpected error",
-                        "schema": {
-                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -63,22 +60,6 @@
                     "type": "string"
                 },
                 "tag": {
-                    "type": "string"
-                }
-            }
-        },
-        "Error": {
-            "type": "object",
-            "required": [
-                "code",
-                "message"
-            ],
-            "properties": {
-                "code": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "message": {
                     "type": "string"
                 }
             }
