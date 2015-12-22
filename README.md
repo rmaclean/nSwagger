@@ -10,7 +10,7 @@ nSwagger is a set of tools for developers who use Microsoft languages (C# & Type
 For **C#**, nSwagger offers a codegen tool built using the [Roslyn](https://github.com/dotnet/roslyn) compiler and aims to provide a number of pieces of functionality.  
 For **TypeScript** as there is already a [great JS codegen](https://github.com/wcandillon/swagger-js-codegen) we are focused on generating definations to make it easier to work with from TypeScript.
 
-![Example Image](https://raw.githubusercontent.com/rmaclean/nSwagger/master/Assets/example.jpg)
+![Example Image](https://raw.githubusercontent.com/rmaclean/nSwagger/master/Assets/example.jpg) 
 
 ## Core library
 
