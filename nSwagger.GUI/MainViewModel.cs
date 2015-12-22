@@ -158,10 +158,10 @@
                 AddExtension = false,
                 CheckFileExists = true,
                 CheckPathExists = true,
-                DefaultExt = ".nSwagger",
+                DefaultExt = ".json",
                 RestoreDirectory = true,
                 ShowReadOnly = true,
-                Filter = "nSwagger Files (*.nSwagger)|*.nSwagger|All Files (*.*)|*.*"
+                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*"
             };
 
             var result = openFileDialog.ShowDialog();
@@ -215,10 +215,10 @@
                 AddExtension = false,
                 CheckFileExists = true,
                 CheckPathExists = true,
-                DefaultExt = ".json",
+                DefaultExt = ".nSwagger",
                 RestoreDirectory = true,
                 ShowReadOnly = true,
-                Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*"
+                Filter = "nSwagger Files (*.nSwagger)|*.nSwagger|All Files (*.*)|*.*"
             };
 
             var result = openFileDialog.ShowDialog();

@@ -1,6 +1,7 @@
 ﻿namespace nSwagger
 {
     using nSwagger.Attributes;
+    using System.Linq;
 
     public interface IJsonSchema
     {
@@ -55,6 +56,10 @@
         public string Name { get; set; }
 
         public string Url { get; set; }
+
+        public override string ToString() => $@"Name: {Name}
+Email: {Email}
+URL: {Url}";
     }
 
     public class Defination : Schema
@@ -138,6 +143,12 @@
 
         [Required]
         public string Version { get; set; }
+
+        public override string ToString()=>  $@"Title: {Title}
+Version: {Version}
+Description: {Description}
+License: {License}
+Contact: {Contact}";
     }
 
     public class Item : IJsonSchema
@@ -184,6 +195,9 @@
         public string Name { get; set; }
 
         public string Url { get; set; }
+
+        public override string ToString() => $@"Name: {Name}
+URL: {Url}";
     }
 
     public class Operation
@@ -269,6 +283,10 @@
         public string Name { get; set; }
 
         public bool Required { get; set; }
+
+        public override string ToString() => $@"Name: {Name}
+Required: {Required}
+In: {In}";
     }
 
     public class PathItem
@@ -291,6 +309,56 @@
         public Operation Post { get; set; }
 
         public Operation Put { get; set; }
+
+        public override string ToString()
+        {
+            var result = $@"Path: {Path}
+Parameters: {Parameters?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", ":"") + next)}
+";
+            if (Delete != null)
+            {
+                result += $@"Delete: {Delete}
+";
+            }
+
+            if (Get != null)
+            {
+                result += $@"Get: {Get}
+";
+            }
+
+            if (Head != null)
+            {
+                result += $@"Head: {Head}
+";
+            }
+
+            if (Options != null)
+            {
+                result += $@"Options: {Options}
+";
+            }
+
+            if (Patch != null)
+            {
+                result += $@"Patch: {Patch}
+";
+            }
+
+            if (Post != null)
+            {
+                result += $@"Post: {Post}
+";
+            }
+
+            if (Put != null)
+            {
+                result += $@"Put: {Put}
+";
+            }
+
+            return result;
+        }
     }
 
     public class Property : IJsonSchema

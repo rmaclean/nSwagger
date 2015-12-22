@@ -34,16 +34,8 @@
             var files = await InputsToFiles(config.Sources);
             foreach (var file in files)
             {
-                try
-                {
-                    var specification = Parser.Parse(File.ReadAllText(file));
-                    result.Add(specification);
-                }
-                catch (Exception ex)
-                {
-                    Debugger.Break();
-                    throw ex;
-                }
+                var specification = Parser.Parse(File.ReadAllText(file));
+                result.Add(specification);
             }
 
             if (config.SaveSettings)

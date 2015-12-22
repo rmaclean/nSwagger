@@ -19,7 +19,7 @@
         {
             var result = new HeaderArray
             {
-                Items = ParseItems(header["items"])
+                Items = new[] { ParseItems(header["items"]) }
             };
 
             return result;
@@ -31,6 +31,14 @@
             SetCommonParameter(result, parameter);
             result.Required = parameter["required"]?.Value<bool>() ?? false;
             result.Schema = ParseSchema(parameter["schema"]);
+            if (result.Schema == null)
+            {
+                result.Schema = new Schema
+                {
+                    Type = "string"
+                };
+            }
+
             return result;
         }
 
@@ -107,7 +115,7 @@
 
             return new ExternalDocs
             {
-                Url = externalDocs["ur"].Value<string>(),
+                Url = externalDocs["url"].Value<string>(),
                 Description = externalDocs["description"]?.Value<string>()
             };
         }
@@ -158,31 +166,30 @@
             result.TermsOfService = infoNode["termsOfService"]?.Value<string>();
             result.Contact = ParseContact(infoNode["contact"] as JObject);
             result.License = ParseLicense(infoNode["license"] as JObject);
+
+            Debug.WriteLine("Finished parsing info. {0}", result);
             return result;
         }
 
-        private static Item[] ParseItems(JToken items)
+        private static Item ParseItems(JToken items)
         {
             if (items == null)
             {
                 return null;
             }
 
-            var result = new List<Item>();
-            foreach (JProperty item in items)
+            if (items["$ref"] != null)
             {
-                if (item.Name.Equals("$ref", StringComparison.OrdinalIgnoreCase))
+                return new Item
                 {
-                    var newItem = new Item
-                    {
-                        Ref = item.Value.Value<string>()
-                    };
+                    Ref = items["$ref"].Value<string>()
+                };
+            }
 
-                    result.Add(newItem);
-                    continue;
-                }
+            if (items["type"] != null)
+            {
+                var type = items["type"].Value<string>();
 
-                var type = item["type"].Value<string>();
                 switch (type.ToUpperInvariant())
                 {
                     case "ARRAY":
@@ -192,10 +199,9 @@
                                 Type = type
                             };
 
-                            newItem.Items = ParseItems(item["items"]);
-                            ParseJsonSchema(newItem, item);
-                            result.Add(newItem);
-                            break;
+                            newItem.Items = new[] { ParseItems(items["items"]) };
+                            ParseJsonSchema(newItem, items["items"]);
+                            return newItem;
                         }
                     default:
                         {
@@ -204,14 +210,13 @@
                                 Type = type
                             };
 
-                            ParseJsonSchema(newItem, item);
-                            result.Add(newItem);
-                            break;
+                            ParseJsonSchema(newItem, items);
+                            return newItem;
                         }
                 }
             }
 
-            return result.ToArray();
+            return null;
         }
 
         private static void ParseJsonSchema(IJsonSchema item, JToken node)
@@ -257,11 +262,12 @@
             }
 
             var result = new Operation();
+            result.OperationId = operation["operationId"]?.Value<string>();
+            Debug.WriteLine($"Starting parsing operation {result.OperationId}");
             result.Tags = operation["tags"]?.Values<string>().ToArray();
             result.Summary = operation["summary"]?.Value<string>();
             result.Description = operation["description"]?.Value<string>();
             result.ExternalDocs = ParseExternalDocs(operation["externalDocs"]);
-            result.OperationId = operation["operationId"]?.Value<string>();
             result.Consumes = operation["consumes"]?.Values<string>().ToArray();
             result.Produces = operation["produces"]?.Values<string>().ToArray();
             result.Parameters = ParseParameters(operation["parameters"]);
@@ -269,12 +275,13 @@
             result.Schemes = operation["schemes"]?.Values<string>().ToArray();
             result.Deprecated = operation["deprecated"]?.Value<bool>() ?? false;
             result.Security = ParseSecurityRequirements(operation["security"] as JArray);
+            Debug.WriteLine($"Finished parsing operation {result.OperationId}");
             return result;
         }
 
         private static void ParseOtherArrayParameter(OtherArrayParameter item, JToken parameter)
         {
-            item.Items = ParseItems(parameter["items"]);
+            item.Items = new[] { ParseItems(parameter["items"]) };
         }
 
         private static Parameter[] ParseParameters(JToken parameters)
@@ -291,6 +298,21 @@
                 var @in = parameter["in"].Value<string>();
                 switch (parameter["in"].Value<string>().ToUpperInvariant())
                 {
+                    case "HEADER":
+                        {
+                            item = new OtherParameter
+                            {
+                                Name = parameter["name"].Value<string>(),
+                                In = "header",
+                                Required = parameter["required"]?.Value<bool>() ?? true,
+                                Description = parameter["description"]?.Value<string>(),
+                                Type = "string"
+                            };
+
+                            break;
+                        }
+
+                    case "FORMDATA":
                     case "BODY":
                         {
                             item = ParseBodyParameter(parameter);
@@ -330,6 +352,8 @@
                 pathItem.Parameters = ParseParameters(path.Children()["parameters"].SingleOrDefault());
                 result.Add(pathItem);
             }
+
+            Debug.WriteLine($"Paths parsed: {result.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next)}");
 
             return result.ToArray();
         }
@@ -412,9 +436,15 @@
             var result = new List<Response>();
             foreach (JProperty response in responses)
             {
+                var statusCode = 0;
+                if (!int.TryParse(response.Name, out statusCode))
+                {
+                    statusCode = 200;
+                }
+
                 var item = new Response
                 {
-                    HttpStatusCode = Convert.ToInt32(response.Name),
+                    HttpStatusCode = statusCode,
                     Description = response.Children()["description"].SingleOrDefault()?.Value<string>(),
                     Schema = ParseSchema(response.Children()["schema"].SingleOrDefault()),
                     Headers = ParseHeaders(response.Children()["header"].SingleOrDefault()),
@@ -445,7 +475,7 @@
                 item.Title = schema["title"]?.Value<string>();
                 item.Description = schema["description"]?.Value<string>();
                 ParseJsonSchema(item, schema);
-                item.Items = ParseItems(schema["items"]);
+                item.Items = new[] { ParseItems(schema["items"]) };
                 item.Properties = ParseProperties(schema["properties"]);
                 item.Discriminator = schema["discriminator"]?.Value<string>();
                 item.ReadOnly = schema["readOnly"]?.Value<bool>() ?? false;
@@ -471,7 +501,7 @@
                 var item = new Scope
                 {
                     Name = scope.Name,
-                    Value = scope.Value<string>()
+                    Value = scope.Value.Value<string>()
                 };
 
                 result.Add(item);
@@ -557,14 +587,21 @@
 
         private static Specification ParseSwaggerObject(JObject parsed)
         {
+            Debug.WriteLine("Starting parsing");
             var result = new Specification();
             result.Swagger = parsed["swagger"].Value<string>();
+            Debug.WriteLine($"Swagger version {result.Swagger}");
             result.Info = ParseInfoObject(parsed["info"] as JObject);
             result.Host = parsed["host"]?.Value<string>();
+            Debug.WriteLine($"Host: {result.Host}");
             result.BasePath = parsed["basePath"]?.Value<string>();
+            Debug.WriteLine($"Base Path: {result.BasePath}");
             result.Schemes = parsed["schemes"]?.Values<string>().ToArray();
+            Debug.WriteLine($"Schemes: {result.Schemes?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next)}");
             result.Consumes = parsed["consumes"]?.Values<string>().ToArray();
+            Debug.WriteLine($"Consumes: {result.Consumes?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next)}");
             result.Produces = parsed["produces"]?.Values<string>().ToArray();
+            Debug.WriteLine($"Produces: {result.Produces?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next)}");
             result.Paths = ParsePath(parsed["paths"] as JObject);
             result.Definations = ParseDefinations(parsed["definitions"]);
             result.Parameters = ParseParameters(parsed["parameters"]);

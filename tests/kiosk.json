@@ -1,1 +1,1254 @@
-{"swagger":"2.0","info":{"version":"v1","title":"API","description":"Internal use API","contact":{"name":"The AppFactory","email":"appfactoryza@microsoft.com"}},"host":"localhost:14446","schemes":["http","https"],"paths":{"/api/Admin":{"post":{"tags":["Admin"],"operationId":"Admin_PostNewAdmin","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/NewAdminRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/api/Cart":{"post":{"tags":["Cart"],"operationId":"Cart_PostUserCartItems","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/AddCartItemRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]},"delete":{"tags":["Cart"],"operationId":"Cart_Delete","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"itemId","in":"query","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/api/Category":{"get":{"tags":["Category"],"operationId":"Category_GetUserMenuCategories","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]},"post":{"tags":["Category"],"operationId":"Category_PostAdminMenuCategory","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/MenuCategoryRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]},"delete":{"tags":["Category"],"operationId":"Category_DeleteMenuCategory","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"categoryId","in":"query","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/api/ConfirmUser":{"post":{"tags":["ConfirmUser"],"operationId":"ConfirmUser_Post","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":[],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/VerifyUserRequest"}}],"responses":{"204":{"description":"No Content"}},"deprecated":false}},"/api/Item":{"get":{"tags":["Item"],"operationId":"Item_GetUserMenuItems","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]},"delete":{"tags":["Item"],"operationId":"Item_DeleteMenuItem","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"itemId","in":"query","required":true,"type":"integer","format":"int32"}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/login/forgotpassword":{"post":{"tags":["Login"],"operationId":"Login_PostForgotPassword","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"email","in":"body","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/login/resetpassword":{"post":{"tags":["Login"],"operationId":"Login_PostResetPassword","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/ResetPasswordRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/Login":{"post":{"tags":["Login"],"operationId":"Login_PostLogin","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/LoginRequest"}}],"responses":{"200":{"description":"OK","schema":{"type":"string"}}},"deprecated":false}},"/api/Logout":{"post":{"tags":["Logout"],"operationId":"Logout_PostLogout","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/api/Signup":{"post":{"tags":["Signup"],"operationId":"Signup_PostSignup","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/SignupRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/Object"}}},"deprecated":false}},"/api/TradingHours":{"get":{"tags":["TradingHours"],"operationId":"TradingHours_GetTradingHours","consumes":[],"produces":["application/json","text/json","application/xml","text/xml"],"responses":{"200":{"description":"OK","schema":{"type":"array","items":{"$ref":"#/definitions/TradingHourResponse"}}}},"deprecated":false,"security":[{"oauth":[]}]},"post":{"tags":["TradingHours"],"operationId":"TradingHours_PostAddTradingHours","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/TradingHoursRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/TradingHourResponse"}}},"deprecated":false,"security":[{"oauth":[]}]}},"/api/TradingHours/{id}":{"put":{"tags":["TradingHours"],"operationId":"TradingHours_PutUpdateTradingHours","consumes":["application/json","text/json","application/xml","text/xml","application/x-www-form-urlencoded"],"produces":["application/json","text/json","application/xml","text/xml"],"parameters":[{"name":"id","in":"path","required":true,"type":"integer","format":"int32"},{"name":"request","in":"body","required":true,"schema":{"$ref":"#/definitions/TradingHoursRequest"}}],"responses":{"200":{"description":"OK","schema":{"$ref":"#/definitions/TradingHourResponse"}}},"deprecated":false,"security":[{"oauth":[]}]}}},"definitions":{"NewAdminRequest":{"type":"object","properties":{"Email":{"type":"string"},"Password":{"type":"string"}}},"Object":{"type":"object","properties":{}},"AddCartItemRequest":{"type":"object","properties":{"CategoryTitle":{"type":"string"},"ItemTitle":{"type":"string"},"Price":{"format":"double","type":"number"},"Quantity":{"format":"int32","type":"integer"}}},"MenuCategoryRequest":{"type":"object","properties":{"Id":{"format":"int32","type":"integer"},"ImageId":{"type":"string"},"State":{"type":"string"},"Title":{"type":"string"}}},"VerifyUserRequest":{"type":"object","properties":{"Email":{"type":"string"},"Pin":{"type":"string"}}},"ResetPasswordRequest":{"type":"object","properties":{"Password":{"type":"string"},"Pin":{"type":"string"}}},"LoginRequest":{"type":"object","properties":{"Email":{"type":"string"},"Password":{"type":"string"}}},"SignupRequest":{"type":"object","properties":{"Email":{"type":"string"},"Password":{"type":"string"}}},"TradingHourResponse":{"type":"object","properties":{"Closing":{"type":"string"},"Date":{"format":"date-time","type":"string"},"Id":{"format":"int32","type":"integer"},"Openning":{"type":"string"}}},"TradingHoursRequest":{"type":"object","properties":{"Closing":{"type":"string"},"Date":{"format":"date-time","type":"string"},"Openning":{"type":"string"}}}},"securityDefinitions":{"oauth2":{"type":"oauth2","description":"OAuth login","flow":"application","scopes":{}}}}
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "v1",
+        "title": "API",
+        "description": "Internal use API",
+        "contact": {
+            "name": "The AppFactory",
+            "email": "appfactoryza@microsoft.com"
+        }
+    },
+    "host": "localhost:14446",
+    "schemes": [ "http", "https" ],
+    "paths": {
+        "/admin/newadmin": {
+            "post": {
+                "tags": [ "Admin" ],
+                "summary": "Used to create an admin in the system",
+                "operationId": "Admin_PostNewAdmin",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SignupRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "201": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/admin/newkitchen": {
+            "post": {
+                "tags": [ "Admin" ],
+                "operationId": "Admin_PostNewKitchen",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SignupRequest" }
+                    }
+                ],
+                "responses": { "204": { "description": "No Content" } },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Admin/{id}": {
+            "delete": {
+                "tags": [ "Admin" ],
+                "operationId": "Admin_DeleteAdmin",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Admin": {
+            "get": {
+                "tags": [ "Admin" ],
+                "summary": "Used to get the admins in the system",
+                "operationId": "Admin_GetAdmins",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "200": {
+                        "description": "{AdminResponse[]}",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/AdminResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/cart/{itemId}/delete": {
+            "delete": {
+                "tags": [ "Cart" ],
+                "summary": "Used to get the delete an item from a card",
+                "operationId": "Cart_Delete",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "itemId",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not logged in" },
+                    "404": { "description": "Card item not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/cart/{orderId}/{state}": {
+            "post": {
+                "tags": [ "Cart" ],
+                "summary": "Used to change the state of a cart",
+                "operationId": "Cart_PostChangeOrderState",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "orderId",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "enum": [ "NotSubmitted", "Pending", "Cancelled", "Ready", "Collected", "Abandoned" ]
+                    }
+                ],
+                "responses": { "204": { "description": "No Content" } },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/cart/{id}/update": {
+            "put": {
+                "tags": [ "Cart" ],
+                "operationId": "Cart_PutCartItems",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/UpdateCartItemsRequest" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Cart": {
+            "get": {
+                "tags": [ "Cart" ],
+                "summary": "Used to get the current not submitted cart for a user",
+                "operationId": "Cart_Get",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "401": { "description": "User is not logged in" },
+                    "404": { "description": "No orders in the not submitted state" },
+                    "200": {
+                        "description": "{API.Models.CartResponse}",
+                        "schema": { "$ref": "#/definitions/CartResponse" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "post": {
+                "tags": [ "Cart" ],
+                "summary": "Used to add an item to the cart",
+                "operationId": "Cart_PostCartItems",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/AddCartItemRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not logged in" },
+                    "404": { "description": "Item does not exist" },
+                    "200": {
+                        "description": "{API.Models.CartResponse}",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    },
+                    "204": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Category/{id}": {
+            "put": {
+                "tags": [ "Category" ],
+                "summary": "Used to update a categorie in the system",
+                "operationId": "Category_PutAdminMenuCategory",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/MenuCategoryRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "title and/or image id not provide" },
+                    "401": { "description": "User is not active or not admin" },
+                    "404": { "description": "category not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "post": {
+                "tags": [ "Category" ],
+                "summary": "Used to enable a menu category",
+                "operationId": "Category_EnableMenuCategory",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not active or not admin" },
+                    "404": { "description": "Category not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "delete": {
+                "tags": [ "Category" ],
+                "summary": "Used to delete a menu category",
+                "operationId": "Category_DeleteMenuCategory",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not active or not admin" },
+                    "404": { "description": "Category not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Category": {
+            "get": {
+                "tags": [ "Category" ],
+                "summary": "Used to get all categories in the system",
+                "operationId": "Category_GetCategories",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "401": { "description": "User is not active" },
+                    "200": {
+                        "description": "{??[]}",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/CategoryResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "post": {
+                "tags": [ "Category" ],
+                "summary": "Used to add a category to the system",
+                "operationId": "Category_PostAdminMenuCategory",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/MenuCategoryRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "title and/or image id not provide" },
+                    "401": { "description": "User is not active or not admin" },
+                    "409": { "description": "Title already in use" },
+                    "201": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/ConfirmUser": {
+            "post": {
+                "tags": [ "ConfirmUser" ],
+                "summary": "Used to verify a user in the system",
+                "operationId": "ConfirmUser_Post",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/VerifyUserRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "User is logged in or email not provided or pin not provided or email is invalid email or\r\n            pin/email aren't in system" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/item/{category}": {
+            "get": {
+                "tags": [ "Item" ],
+                "summary": "Used to get all items in a category",
+                "operationId": "Item_GetMenuItems",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not active" },
+                    "200": {
+                        "description": "{ItemResponse[]}",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/ItemResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/item/{id}/enable": {
+            "put": {
+                "tags": [ "Item" ],
+                "summary": "Used to enable an item in the system",
+                "operationId": "Item_PutEnableMenuItem",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not active or not admin/kitchen" },
+                    "404": { "description": "item not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/item/{id}/update": {
+            "put": {
+                "tags": [ "Item" ],
+                "operationId": "Item_PutItem",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ItemRequest" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Item/{id}": {
+            "delete": {
+                "tags": [ "Item" ],
+                "summary": "Used to disable an item in the system",
+                "operationId": "Item_DeleteMenuItem",
+                "consumes": [ ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User is not active or not admin/kitchen" },
+                    "404": { "description": "item not found" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Item": {
+            "post": {
+                "tags": [ "Item" ],
+                "summary": "Used to add an item to the system",
+                "operationId": "Item_PostMenuItem",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ItemRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Titl or image ID not provided or price is zero" },
+                    "401": { "description": "User is not active or not admin" },
+                    "409": { "description": "Item with title already exists in system" },
+                    "201": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/login/forgotpassword": {
+            "post": {
+                "tags": [ "Login" ],
+                "summary": "Used to start the forgot password process",
+                "operationId": "Login_PostForgotPassword",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "responses": { "204": { "description": "" } },
+                "deprecated": false
+            }
+        },
+        "/login/resetpassword": {
+            "post": {
+                "tags": [ "Login" ],
+                "summary": "Used to reset the password",
+                "operationId": "Login_PostResetPassword",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ResetPasswordRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Invalid password or pin not found" },
+                    "404": { "description": "Invalid password" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Login": {
+            "post": {
+                "tags": [ "Login" ],
+                "summary": "Used to login to the system",
+                "operationId": "Login_PostLogin",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/LoginRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "user not found or password wrong" },
+                    "200": {
+                        "description": "{API.Models.LoginResponse}",
+                        "schema": { "$ref": "#/definitions/LoginResponse" }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Logout": {
+            "post": {
+                "tags": [ "Logout" ],
+                "summary": "Used to log out of the system",
+                "operationId": "Logout_PostLogout",
+                "consumes": [ ],
+                "produces": [ ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "204": { "description": "" }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/order/{state}/getbystate": {
+            "get": {
+                "tags": [ "Order" ],
+                "summary": "Gets the orders in the system by state",
+                "operationId": "Order_GetOrdersByState",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "state",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "enum": [ "NotSubmitted", "Pending", "Cancelled", "Ready", "Collected", "Abandoned" ]
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "Unauthorised" },
+                    "4014": { "description": "No orders found" },
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/OrderResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/order/getbydate": {
+            "get": {
+                "tags": [ "Order" ],
+                "summary": "Gets the current user orders for today",
+                "operationId": "Order_GetTodayOrders",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "401": { "description": "Unauthorised" },
+                    "4014": { "description": "No orders found" },
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/OrderResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/order/history": {
+            "get": {
+                "tags": [ "Order" ],
+                "summary": "Gets the current user or supplied user (if admin request) orders",
+                "operationId": "Order_GetUserOrderHistory",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "query",
+                        "description": "The user ID to look for - optional",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "Unauthorised" },
+                    "4014": { "description": "No orders found" },
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/OrderItemResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/Reporting": {
+            "post": {
+                "tags": [ "Reporting" ],
+                "summary": "Used to get a report for the orders",
+                "operationId": "Reporting_Post",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ReportingRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "200": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/signup/resend": {
+            "post": {
+                "tags": [ "Signup" ],
+                "summary": "Used to resend confirmation pin",
+                "operationId": "Signup_PostResendPin",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SignupRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Email is invalid or user does not exist." },
+                    "202": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Signup": {
+            "post": {
+                "tags": [ "Signup" ],
+                "summary": "Used to signup for the service",
+                "operationId": "Signup_PostSignup",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SignupRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Email or password is invalid or user already exists." },
+                    "202": { "description": "" }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/TradingHours": {
+            "get": {
+                "tags": [ "TradingHours" ],
+                "summary": "Get all trading hours",
+                "operationId": "TradingHours_GetTradingHours",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "401": { "description": "User not authorised" },
+                    "200": {
+                        "description": "{TradingHourResponse[]}",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/TradingHourResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "post": {
+                "tags": [ "TradingHours" ],
+                "summary": "add trading hours",
+                "operationId": "TradingHours_PostAddTradingHours",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/TradingHoursRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User not authorised or not admin" },
+                    "409": { "description": "Trading hour already exists" },
+                    "201": {
+                        "description": "{TradingHourResponse}",
+                        "schema": { "$ref": "#/definitions/TradingHourResponse" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/TradingHours/{id}": {
+            "put": {
+                "tags": [ "TradingHours" ],
+                "summary": "Update add trading hours",
+                "operationId": "TradingHours_PutUpdateTradingHours",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/TradingHoursRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User not authorised or not admin" },
+                    "404": { "description": "Trading hour not found" },
+                    "200": {
+                        "description": "{TradingHourResponse}",
+                        "schema": { "$ref": "#/definitions/TradingHourResponse" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/user/{id}/disable": {
+            "put": {
+                "tags": [ "User" ],
+                "summary": "Used to disable in the admin in the system",
+                "operationId": "User_PutDisableAdmin",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "204": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/user/{id}/enable": {
+            "put": {
+                "tags": [ "User" ],
+                "summary": "Used to disable in the admin in the system",
+                "operationId": "User_PutEnableAdmin",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "204": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/user/{id}/{role}": {
+            "put": {
+                "tags": [ "User" ],
+                "operationId": "User_PutUserRole",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "enum": [ "User", "Admin", "Kitchen", "Service" ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/User": {
+            "get": {
+                "tags": [ "User" ],
+                "operationId": "User_GetAllUsers",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/AdminResponse" }
+                        }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            },
+            "put": {
+                "tags": [ "User" ],
+                "operationId": "User_PutUser",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/UpdateUserRequest" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/api/User/{id}": {
+            "get": {
+                "tags": [ "User" ],
+                "operationId": "User_GetUser",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        }
+    },
+    "definitions": {
+        "SignupRequest": {
+            "type": "object",
+            "properties": {
+                "Email": { "type": "string" },
+                "Password": { "type": "string" }
+            }
+        },
+        "Object": {
+            "type": "object",
+            "properties": { }
+        },
+        "AdminResponse": {
+            "type": "object",
+            "properties": {
+                "Email": { "type": "string" },
+                "Id": { "type": "string" },
+                "Role": {
+                    "enum": [ "User", "Admin", "Kitchen", "Service" ],
+                    "type": "string"
+                },
+                "State": {
+                    "enum": [ "Active", "Disabled", "WaitingForPinConfirmation" ],
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateCartItemsRequest": {
+            "type": "object",
+            "properties": {
+                "CartItems": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/AddCartItemRequest" }
+                }
+            }
+        },
+        "AddCartItemRequest": {
+            "type": "object",
+            "properties": {
+                "CartItem": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Item": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Quantity": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "CartResponse": {
+            "type": "object",
+            "properties": {
+                "CartItems": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/CartItemResponse" }
+                },
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "OrderNumber": { "type": "string" }
+            }
+        },
+        "CartItemResponse": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Item": { "$ref": "#/definitions/ItemResponse" },
+                "Price": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "Quantity": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "ItemResponse": {
+            "type": "object",
+            "properties": {
+                "Description": { "type": "string" },
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Image": { "type": "string" },
+                "Price": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "Title": { "type": "string" }
+            }
+        },
+        "MenuCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "ImageId": { "type": "string" },
+                "Title": { "type": "string" }
+            }
+        },
+        "CategoryResponse": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "ImageId": { "type": "string" },
+                "State": {
+                    "enum": [ "Active", "Disabled" ],
+                    "type": "string",
+                    "readOnly": true
+                },
+                "Title": { "type": "string" }
+            }
+        },
+        "VerifyUserRequest": {
+            "type": "object",
+            "properties": {
+                "Email": { "type": "string" },
+                "Pin": { "type": "string" }
+            }
+        },
+        "ItemRequest": {
+            "type": "object",
+            "properties": {
+                "Description": { "type": "string" },
+                "ImageId": { "type": "string" },
+                "Price": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "Title": { "type": "string" }
+            }
+        },
+        "ResetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "Password": { "type": "string" },
+                "Pin": { "type": "string" }
+            }
+        },
+        "LoginRequest": {
+            "type": "object",
+            "properties": {
+                "Email": { "type": "string" },
+                "Password": { "type": "string" }
+            }
+        },
+        "LoginResponse": {
+            "type": "object",
+            "properties": {
+                "Role": {
+                    "enum": [ "User", "Admin", "Kitchen", "Service" ],
+                    "type": "string"
+                },
+                "Token": { "type": "string" }
+            }
+        },
+        "OrderResponse": {
+            "type": "object",
+            "properties": {
+                "Date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Items": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/OrderItemResponse" }
+                },
+                "OrderId": { "type": "string" },
+                "State": {
+                    "enum": [ "NotSubmitted", "Pending", "Cancelled", "Ready", "Collected", "Abandoned" ],
+                    "type": "string"
+                },
+                "TotalPrice": {
+                    "format": "double",
+                    "type": "number"
+                }
+            }
+        },
+        "OrderItemResponse": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "item": { "$ref": "#/definitions/ItemResponse" },
+                "OrderId": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Price": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "Quantity": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "ReportingRequest": {
+            "type": "object",
+            "properties": {
+                "EndDate": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "OrderStates": {
+                    "enum": [ "NotSubmitted", "Pending", "Cancelled", "Ready", "Collected", "Abandoned" ],
+                    "type": "string"
+                },
+                "StartDate": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "TradingHourResponse": {
+            "type": "object",
+            "properties": {
+                "Closing": { "type": "string" },
+                "Date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Openning": { "type": "string" }
+            }
+        },
+        "TradingHoursRequest": {
+            "type": "object",
+            "properties": {
+                "Closing": { "type": "string" },
+                "Date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Openning": { "type": "string" }
+            }
+        },
+        "UpdateUserRequest": {
+            "type": "object",
+            "properties": { "Password": { "type": "string" } }
+        }
+    },
+    "securityDefinitions": {
+        "oauth": {
+            "type": "oauth2",
+            "flow": "application",
+            "tokenUrl": "api/login",
+            "scopes": { "all": "all" }
+        }
+    }
+}

@@ -5,13 +5,14 @@
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     public static class CSharpGenerator
     {
-        private static Regex ArrayClassCleaner = new Regex("(\\[(?<class>.+)])");
+        private static Regex arrayClassCleaner = new Regex("(\\[(?<class>\\w+)])");
 
         private enum HTTPAction
         {
@@ -160,7 +161,7 @@
                     var type = "";
                     var typeFormat = "";
                     var @default = "";
-                    if (@param.In.Equals("BODY", StringComparison.OrdinalIgnoreCase))
+                    if (@param.GetType() == typeof(BodyParameter))
                     {
                         hasBodyParam = true;
                         var bodyParam = @param as BodyParameter;
@@ -190,7 +191,7 @@
                         {
                             Default = @default,
                             Name = name,
-                            Type = JsonSchemaToDotNetType(type, typeFormat),
+                            Type = type.Equals("array", StringComparison.OrdinalIgnoreCase) ? "object[]" : JsonSchemaToDotNetType(type, typeFormat),
                             Location = @param.In,
                             Description = @param.Description
                         });
@@ -255,42 +256,42 @@
                 method = method.AddParameterListParameters(parameters.Select(_ => Parameter(_)).ToArray());
             }
 
-            var httpmethod = "await ";
+            var httpMethod = "await ";
             switch (config.HTTPAction)
             {
                 case HTTPAction.Put:
                     {
-                        httpmethod += "HTTP.HTTP.PutAsync";
+                        httpMethod += "HTTP.HTTP.PutAsync";
                         break;
                     }
                 case HTTPAction.Get:
                     {
-                        httpmethod += "HTTP.HTTP.GetAsync";
+                        httpMethod += "HTTP.HTTP.GetAsync";
                         break;
                     }
                 case HTTPAction.Post:
                     {
-                        httpmethod += "HTTP.HTTP.PostAsync";
+                        httpMethod += "HTTP.HTTP.PostAsync";
                         break;
                     }
                 case HTTPAction.Delete:
                     {
-                        httpmethod += "HTTP.HTTP.DeleteAsync";
+                        httpMethod += "HTTP.HTTP.DeleteAsync";
                         break;
                     }
                 case HTTPAction.Head:
                     {
-                        httpmethod += "HTTP.HTTP.HeadAsync";
+                        httpMethod += "HTTP.HTTP.HeadAsync";
                         break;
                     }
                 case HTTPAction.Options:
                     {
-                        httpmethod += "HTTP.HTTP.OptionsAsync";
+                        httpMethod += "HTTP.HTTP.OptionsAsync";
                         break;
                     }
                 case HTTPAction.Patch:
                     {
-                        httpmethod += "HTTP.HTTP.PatchAsync";
+                        httpMethod += "HTTP.HTTP.PatchAsync";
                         break;
                     }
             }
@@ -304,23 +305,33 @@
                 }
             }
 
-            httpmethod += $"(new Uri(url + \"{urlPath}\", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds({swaggerConfig.HTTPTimeout.TotalSeconds}))";
+            httpMethod += $"(new Uri(url + \"{urlPath}\", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds({swaggerConfig.HTTPTimeout.TotalSeconds}))";
             if (hasBodyParam)
             {
-                var bodyParamName = parameters.Single(_ => _.Location != null && _.Location.Equals("body", StringComparison.OrdinalIgnoreCase)).Name;
-                httpmethod += $", new StringContent(JsonConvert.SerializeObject({bodyParamName}))";
+                var bodyParam = parameters.SingleOrDefault(_ => _.Location != null && (_.Location.Equals("body", StringComparison.OrdinalIgnoreCase)));
+                if (bodyParam != null)
+                {
+                    httpMethod += $", new StringContent(JsonConvert.SerializeObject({bodyParam.Name}))";
+                }
+
+                var formDataParams = parameters.Where(_ => _.Location != null && (_.Location.Equals("formdata", StringComparison.OrdinalIgnoreCase)));
+                if (formDataParams.Any())
+                {
+                    var formDataValue = formDataParams.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? ", " : "") + next.Name);
+                    httpMethod += $@", new StringContent(JsonConvert.SerializeObject(new {{{formDataValue}}}))";
+                }
             }
 
             if (authedCall)
             {
-                httpmethod += ", token: oauthToken";
+                httpMethod += ", token: oauthToken";
             }
 
-            httpmethod += ");";
+            httpMethod += ");";
 
             var methodBody = $@"
 {{
-var response = {httpmethod}
+var response = {httpMethod}
 if (response == null)
 {{
 return new APIResponse<{responseClass}>(false);
@@ -414,9 +425,9 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
         private static string ClassNameNormaliser(string className)
         {
             var result = className.Replace(" ", "");
-            while (ArrayClassCleaner.IsMatch(result))
+            while (arrayClassCleaner.IsMatch(result))
             {
-                result = ArrayClassCleaner.Replace(result, "Of${class}");
+                result = arrayClassCleaner.Replace(result, "Of${class}");
             }
 
             if (result.Equals("object", StringComparison.OrdinalIgnoreCase))
@@ -560,6 +571,17 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             if (IsJsonSchemaEnum(schema))
             {
                 return parentName + nodeName;
+            }
+
+            if (schema.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
+            {
+                var schemaAsProperty = schema as Property;
+                if (schemaAsProperty != null)
+                {
+                    return JsonSchemaToDotNetType(schemaAsProperty.ArrayItemType, null) + "[]";
+                }
+
+                return "object[]";
             }
 
             return JsonSchemaToDotNetType(schema.Type, schema.Format);
