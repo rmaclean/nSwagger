@@ -150,7 +150,7 @@
                 operationName = config.HTTPAction.ToString() + config.Path.Substring(1, end);
             }
 
-            var methodName = operationName + "Async";
+            var methodName = operationName.Replace(" ", "").Trim() + "Async";
 
             if (config.Operation.Parameters != null)
             {
@@ -385,17 +385,17 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
 
             if (!string.IsNullOrWhiteSpace(config.Operation.Summary))
             {
-                xmlComments.AddRange(AddXmlComment("summary", config.Operation.Summary));
+                xmlComments.AddRange(AddXmlComment("summary", CleanXMLComment(config.Operation.Summary)));
             }
 
             if (!string.IsNullOrWhiteSpace(config.Operation.Description))
             {
-                xmlComments.AddRange(AddXmlComment("remarks", config.Operation.Description));
+                xmlComments.AddRange(AddXmlComment("remarks", CleanXMLComment(config.Operation.Description)));
             }
 
             if (!string.IsNullOrWhiteSpace(successResponse.Description))
             {
-                xmlComments.AddRange(AddXmlComment("returns", successResponse.Description));
+                xmlComments.AddRange(AddXmlComment("returns", CleanXMLComment(successResponse.Description)));
             }
 
             xmlComments.AddRange(parameters.Select(_ => AddXmlParamComment(_.Name, _.Description)));
@@ -404,6 +404,17 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
                 .WithLeadingTrivia(SyntaxExtensions.ToSyntaxTriviaList(xmlComments));
 
             return @class.AddMembers(method);
+        }
+
+        private static string CleanXMLComment(string description)
+        {
+            var lines = description.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length == 1)
+            {
+                return description;
+            }
+
+            return lines.Aggregate("", (curr, next) => curr + (curr.Length > 0 ? Environment.NewLine + "        //" : "") + next.Trim());
         }
 
         private static SyntaxTrivia[] AddXmlComment(string tag, string text) => new[] {
@@ -434,7 +445,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
                 return "object";
             }
 
-            return result;
+            return JsonSchemaToDotNetType(result, null);
         }
 
         private static ConstructorDeclarationSyntax Constructor(string className, string body, params SimplifiedParameter[] parameters)
