@@ -13,17 +13,6 @@
     {
         private static Regex arrayClassCleaner = new Regex("(\\[(?<class>\\w+)])");
 
-        private enum HTTPAction
-        {
-            Put,
-            Get,
-            Post,
-            Delete,
-            Head,
-            Options,
-            Patch
-        }
-
         public static void Run(Configuration config, Specification spec)
         {
             var syntax = Begin(config);

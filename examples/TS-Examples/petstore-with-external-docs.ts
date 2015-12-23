@@ -33,7 +33,7 @@ namespace nSwagger {
         }
 
         export interface API {
-            setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;
+            setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;
             findPets(parameters?: findPetsRequest): PromiseLike<Pet>;
             addPet(parameters: addPetRequest): PromiseLike<Pet>;
             deletePet(parameters: deletePetRequest): PromiseLike<void>;

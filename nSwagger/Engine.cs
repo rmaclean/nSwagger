@@ -6,6 +6,17 @@
     using System.IO;
     using System.Threading.Tasks;
 
+    public enum HTTPAction
+    {
+        Put,
+        Get,
+        Post,
+        Delete,
+        Head,
+        Options,
+        Patch
+    }
+
     public static class Engine
     {
         public static async Task Run(Configuration config)

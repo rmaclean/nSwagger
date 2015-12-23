@@ -778,7 +778,7 @@ namespace nSwagger {
         }
 
         export interface API {
-            setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;
+            setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;
             Admins_GetAdmin(parameters: Admins_GetAdminRequest): PromiseLike<AdminResponse>;
             Admins_PutUpdateAdmin(parameters: Admins_PutUpdateAdminRequest): PromiseLike<AdminResponse>;
             Admins_GetAdmins(parameters?: Admins_GetAdminsRequest): PromiseLike<CollectionResponseAdminResponse>;

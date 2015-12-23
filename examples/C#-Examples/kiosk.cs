@@ -523,6 +523,49 @@ namespace nSwagger
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
+        public partial class UpdateUserAdminRequest
+        {
+            public string Id
+            {
+                get;
+                set;
+            }
+
+            public string Email
+            {
+                get;
+                set;
+            }
+
+            public enum UpdateUserAdminRequestState
+            {
+                Active,
+                Disabled,
+                WaitingForPinConfirmation
+            }
+
+            public UpdateUserAdminRequestState State
+            {
+                get;
+                set;
+            }
+
+            public enum UpdateUserAdminRequestRole
+            {
+                User,
+                Admin,
+                Kitchen,
+                Service
+            }
+
+            public UpdateUserAdminRequestRole Role
+            {
+                get;
+                set;
+            }
+        }
+
         //<summary>
         // Used to create an admin in the system
         //</summary>
@@ -1836,9 +1879,79 @@ namespace nSwagger
             }
         }
 
-        //<returns>
-        // OK
-        //</returns>
+        //<summary>
+        // Used to edit user password in the system
+        //</summary>
+        //<param name="oauthToken"></param>
+        //<param name="request"></param>
+        public async Task<APIResponse<object>> User_PutUserAsync(string oauthToken, UpdateUserRequest request)
+        {
+            {
+                var response = await HTTP.HTTP.PutAsync(new Uri(url + "/user/passwordedit", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds(30)), new StringContent(JsonConvert.SerializeObject(request)), token: oauthToken);
+                if (response == null)
+                {
+                    return new APIResponse<object>(false);
+                }
+
+                switch ((int)response.StatusCode)
+                {
+                    case 400:
+                    {
+                        return new APIResponse<object>(response.StatusCode);
+                    }
+
+                    case 204:
+                    {
+                        var data = JsonConvert.DeserializeObject<object>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<object>(successData: data, statusCode: response.StatusCode);
+                    }
+
+                    default:
+                    {
+                        return new APIResponse<object>(response.StatusCode);
+                    }
+                }
+            }
+        }
+
+        //<summary>
+        // Used to edit user account by admin in the system
+        //</summary>
+        //<param name="oauthToken"></param>
+        //<param name="request"></param>
+        public async Task<APIResponse<object>> User_PutUserAdminAsync(string oauthToken, UpdateUserAdminRequest request)
+        {
+            {
+                var response = await HTTP.HTTP.PutAsync(new Uri(url + "/user/edit", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds(30)), new StringContent(JsonConvert.SerializeObject(request)), token: oauthToken);
+                if (response == null)
+                {
+                    return new APIResponse<object>(false);
+                }
+
+                switch ((int)response.StatusCode)
+                {
+                    case 401:
+                    {
+                        return new APIResponse<object>(response.StatusCode);
+                    }
+
+                    case 204:
+                    {
+                        var data = JsonConvert.DeserializeObject<object>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<object>(successData: data, statusCode: response.StatusCode);
+                    }
+
+                    default:
+                    {
+                        return new APIResponse<object>(response.StatusCode);
+                    }
+                }
+            }
+        }
+
+        //<summary>
+        // Used to update user role in the system
+        //</summary>
         //<param name="oauthToken"></param>
         //<param name="id"></param>
         //<param name="role"></param>
@@ -1853,7 +1966,12 @@ namespace nSwagger
 
                 switch ((int)response.StatusCode)
                 {
-                    case 200:
+                    case 401:
+                    {
+                        return new APIResponse<object>(response.StatusCode);
+                    }
+
+                    case 204:
                     {
                         var data = JsonConvert.DeserializeObject<object>(await response.Content.ReadAsStringAsync());
                         return new APIResponse<object>(successData: data, statusCode: response.StatusCode);
@@ -1900,57 +2018,27 @@ namespace nSwagger
         // OK
         //</returns>
         //<param name="oauthToken"></param>
-        //<param name="request"></param>
-        public async Task<APIResponse<object>> User_PutUserAsync(string oauthToken, UpdateUserRequest request)
-        {
-            {
-                var response = await HTTP.HTTP.PutAsync(new Uri(url + "/api/User", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds(30)), new StringContent(JsonConvert.SerializeObject(request)), token: oauthToken);
-                if (response == null)
-                {
-                    return new APIResponse<object>(false);
-                }
-
-                switch ((int)response.StatusCode)
-                {
-                    case 200:
-                    {
-                        var data = JsonConvert.DeserializeObject<object>(await response.Content.ReadAsStringAsync());
-                        return new APIResponse<object>(successData: data, statusCode: response.StatusCode);
-                    }
-
-                    default:
-                    {
-                        return new APIResponse<object>(response.StatusCode);
-                    }
-                }
-            }
-        }
-
-        //<returns>
-        // OK
-        //</returns>
-        //<param name="oauthToken"></param>
         //<param name="id"></param>
-        public async Task<APIResponse<object>> User_GetUserAsync(string oauthToken, string id)
+        public async Task<APIResponse<AdminResponse>> User_GetUserAsync(string oauthToken, string id)
         {
             {
                 var response = await HTTP.HTTP.GetAsync(new Uri(url + "/api/User/" + id + "", UriKind.Absolute), new HTTPOptions(TimeSpan.FromSeconds(30)), token: oauthToken);
                 if (response == null)
                 {
-                    return new APIResponse<object>(false);
+                    return new APIResponse<AdminResponse>(false);
                 }
 
                 switch ((int)response.StatusCode)
                 {
                     case 200:
                     {
-                        var data = JsonConvert.DeserializeObject<object>(await response.Content.ReadAsStringAsync());
-                        return new APIResponse<object>(successData: data, statusCode: response.StatusCode);
+                        var data = JsonConvert.DeserializeObject<AdminResponse>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<AdminResponse>(successData: data, statusCode: response.StatusCode);
                     }
 
                     default:
                     {
-                        return new APIResponse<object>(response.StatusCode);
+                        return new APIResponse<AdminResponse>(response.StatusCode);
                     }
                 }
             }

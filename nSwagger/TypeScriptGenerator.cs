@@ -102,8 +102,47 @@
             }
         }
 
-        private void AddAPICall(CoderStringBuilder output, Operation operation)
+        private void AddAPICall(CoderStringBuilder output, PathItem path, HTTPAction action)
         {
+            var operation = default(Operation);
+            switch (action)
+            {
+                case HTTPAction.Put:
+                    {
+                        operation = path.Put;
+                        break;
+                    }
+                case HTTPAction.Get:
+                    {
+                        operation = path.Get;
+                        break;
+                    }
+                case HTTPAction.Post:
+                    {
+                        operation = path.Post;
+                        break;
+                    }
+                case HTTPAction.Delete:
+                    {
+                        operation = path.Delete;
+                        break;
+                    }
+                case HTTPAction.Head:
+                    {
+                        operation = path.Head;
+                        break;
+                    }
+                case HTTPAction.Options:
+                    {
+                        operation = path.Options;
+                        break;
+                    }
+                case HTTPAction.Patch:
+                    {
+                        operation = path.Patch;
+                        break;
+                    }
+            }
             if (operation == null)
             {
                 return;
@@ -121,7 +160,17 @@
                 parameters = $"parameters{optional}: {CleanClassName(operation.OperationId + "Request")}";
             }
 
-            var operationContent = new StringBuilder(CleanClassName(operation.OperationId) + "(" + parameters + "): ");
+            var methodName = "";
+            if (operation.OperationId != null)
+            {
+                methodName = CleanClassName(operation.OperationId);
+            }
+            else
+            {
+                methodName = CleanClassName(GetPathToMethodName(action.ToString(), path.Path));
+            }
+
+            var operationContent = new StringBuilder(methodName + "(" + parameters + "): ");
             var success = operation.Responses.FirstOrDefault(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299);
             if (success == null || success.Schema == null)
             {
@@ -260,6 +309,24 @@
             output.AppendLine();
         }
 
+        private string CamelCase(IEnumerable<string> segments)
+        {
+            if (segments.Count() == 1)
+            {
+                return segments.First();
+            }
+
+            return segments.Aggregate((curr, next) =>
+            {
+                if (curr.Length == 0)
+                {
+                    return next[0].ToString().ToLowerInvariant() + next.Substring(1);
+                }
+
+                return next[0].ToString().ToUpperInvariant() + next.Substring(1);
+            });
+        }
+
         private string CleanClassName(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -267,7 +334,7 @@
                 return "";
             }
 
-            var jsonType = whitespace.Replace(input.Replace("[", "").Replace("]", ""), "");
+            var jsonType = whitespace.Replace(input.Replace("[", "").Replace("]", "").Replace("{", "").Replace("}", ""), "");
             if (jsonType.Equals("object", StringComparison.OrdinalIgnoreCase))
             {
                 return "any";
@@ -279,6 +346,34 @@
             }
 
             return jsonType;
+        }
+
+        private string GetPathToMethodName(string method, string path)
+        {
+            if (path == "/" || path == "")
+            {
+                return method;
+            }
+
+            // clean url path for requests ending with "/"
+            var cleanPath = path;
+            if (cleanPath.IndexOf("/", cleanPath.Length - 1, StringComparison.OrdinalIgnoreCase) != -1)
+            {
+                cleanPath = cleanPath.Substring(0, cleanPath.Length - 1);
+            }
+
+            var segments = cleanPath.Split('/').Skip(1).Select(segment =>
+            {
+                if (segment[0] == '{' && segment[segment.Length - 1] == '}')
+                {
+                    return "by" + segment[1].ToString().ToUpperInvariant() + segment.Substring(2, segment.Length - 2);
+                }
+
+                return segment;
+            });
+
+            var result = CamelCase(segments);
+            return method.ToLowerInvariant() + result[0].ToString().ToUpperInvariant() + result.Substring(1);
         }
 
         private void Process(CoderStringBuilder output, Specification specification)
@@ -303,17 +398,17 @@
 
             output.AppendLine("export interface API {");
             output.Indent();
-            output.AppendLine("setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;");
+            output.AppendLine("setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;");
 
             foreach (var path in specification.Paths)
             {
-                AddAPICall(output, path.Delete);
-                AddAPICall(output, path.Get);
-                AddAPICall(output, path.Head);
-                AddAPICall(output, path.Options);
-                AddAPICall(output, path.Patch);
-                AddAPICall(output, path.Post);
-                AddAPICall(output, path.Put);
+                AddAPICall(output, path, HTTPAction.Delete);
+                AddAPICall(output, path, HTTPAction.Get);
+                AddAPICall(output, path, HTTPAction.Head);
+                AddAPICall(output, path, HTTPAction.Options);
+                AddAPICall(output, path, HTTPAction.Patch);
+                AddAPICall(output, path, HTTPAction.Post);
+                AddAPICall(output, path, HTTPAction.Put);
             }
 
             output.Outdent();

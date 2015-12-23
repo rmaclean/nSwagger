@@ -44,7 +44,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>nSwagger.VS2015</RootNamespace>
     <AssemblyName>nSwagger.VS2015</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>

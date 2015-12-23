@@ -883,9 +883,62 @@
                 "security": [ { "oauth": [ ] } ]
             }
         },
+        "/user/passwordedit": {
+            "put": {
+                "tags": [ "User" ],
+                "summary": "Used to edit user password in the system",
+                "operationId": "User_PutUser",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/UpdateUserRequest" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Password invalid" },
+                    "204": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
+        "/user/edit": {
+            "put": {
+                "tags": [ "User" ],
+                "summary": "Used to edit user account by admin in the system",
+                "operationId": "User_PutUserAdmin",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/UpdateUserAdminRequest" }
+                    }
+                ],
+                "responses": {
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "204": {
+                        "description": "",
+                        "schema": { "$ref": "#/definitions/Object" }
+                    }
+                },
+                "deprecated": false,
+                "security": [ { "oauth": [ ] } ]
+            }
+        },
         "/user/{id}/{role}": {
             "put": {
                 "tags": [ "User" ],
+                "summary": "Used to update user role in the system",
                 "operationId": "User_PutUserRole",
                 "consumes": [ ],
                 "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
@@ -905,8 +958,9 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "401": { "description": "User isn't admin or is not logged in" },
+                    "204": {
+                        "description": "",
                         "schema": { "$ref": "#/definitions/Object" }
                     }
                 },
@@ -931,28 +985,6 @@
                 },
                 "deprecated": false,
                 "security": [ { "oauth": [ ] } ]
-            },
-            "put": {
-                "tags": [ "User" ],
-                "operationId": "User_PutUser",
-                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
-                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
-                "parameters": [
-                    {
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": { "$ref": "#/definitions/UpdateUserRequest" }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": { "$ref": "#/definitions/Object" }
-                    }
-                },
-                "deprecated": false,
-                "security": [ { "oauth": [ ] } ]
             }
         },
         "/api/User/{id}": {
@@ -972,7 +1004,7 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": { "$ref": "#/definitions/Object" }
+                        "schema": { "$ref": "#/definitions/AdminResponse" }
                     }
                 },
                 "deprecated": false,
@@ -1241,6 +1273,21 @@
         "UpdateUserRequest": {
             "type": "object",
             "properties": { "Password": { "type": "string" } }
+        },
+        "UpdateUserAdminRequest": {
+            "type": "object",
+            "properties": {
+                "Id": { "type": "string" },
+                "Email": { "type": "string" },
+                "State": {
+                    "enum": [ "Active", "Disabled", "WaitingForPinConfirmation" ],
+                    "type": "string"
+                },
+                "Role": {
+                    "enum": [ "User", "Admin", "Kitchen", "Service" ],
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

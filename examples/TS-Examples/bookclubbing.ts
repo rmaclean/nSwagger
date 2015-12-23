@@ -1285,7 +1285,7 @@ namespace nSwagger {
         }
 
         export interface API {
-            setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;
+            setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;
             Auth_PostResendRegistrationPin(parameters: Auth_PostResendRegistrationPinRequest): PromiseLike<void>;
             Auth_Post(parameters: Auth_PostRequest): PromiseLike<string>;
             Book_GetBookAdmin(parameters: Book_GetBookAdminRequest): PromiseLike<BookItem>;

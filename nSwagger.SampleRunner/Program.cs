@@ -15,7 +15,7 @@
             Console.Title = "Testing nSwagger";
             SolutionRoot = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\");
             var path = Path.Combine(SolutionRoot, "examples");
-            var files = Directory.GetFiles(path);
+            var files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly);
             var config = new Configuration
             {
                 Language = TargetLanguage.csharp,

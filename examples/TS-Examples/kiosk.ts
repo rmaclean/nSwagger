@@ -166,6 +166,26 @@ namespace nSwagger {
             Password: string;
         }
 
+        export class UpdateUserAdminRequest {
+            Id: string;
+            Email: string;
+            State: string;
+            Role: string;
+        }
+
+        export enum UpdateUserAdminRequestState {
+            Active,
+            Disabled,
+            WaitingForPinConfirmation
+        }
+
+        export enum UpdateUserAdminRequestRole {
+            User,
+            Admin,
+            Kitchen,
+            Service
+        }
+
         export interface Admin_PostNewAdminRequest {
             request: SignupRequest;
         }
@@ -287,13 +307,17 @@ namespace nSwagger {
             id: string;
         }
 
+        export interface User_PutUserRequest {
+            request: UpdateUserRequest;
+        }
+
+        export interface User_PutUserAdminRequest {
+            request: UpdateUserAdminRequest;
+        }
+
         export interface User_PutUserRoleRequest {
             id: string;
             role: string;
-        }
-
-        export interface User_PutUserRequest {
-            request: UpdateUserRequest;
         }
 
         export interface User_GetUserRequest {
@@ -301,7 +325,7 @@ namespace nSwagger {
         }
 
         export interface API {
-            setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;
+            setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;
             Admin_PostNewAdmin(parameters: Admin_PostNewAdminRequest): PromiseLike<void>;
             Admin_PostNewKitchen(parameters: Admin_PostNewKitchenRequest): PromiseLike<void>;
             Admin_DeleteAdmin(parameters: Admin_DeleteAdminRequest): PromiseLike<any>;
@@ -337,10 +361,11 @@ namespace nSwagger {
             TradingHours_PutUpdateTradingHours(parameters: TradingHours_PutUpdateTradingHoursRequest): PromiseLike<TradingHourResponse>;
             User_PutDisableAdmin(parameters: User_PutDisableAdminRequest): PromiseLike<any>;
             User_PutEnableAdmin(parameters: User_PutEnableAdminRequest): PromiseLike<any>;
+            User_PutUser(parameters: User_PutUserRequest): PromiseLike<any>;
+            User_PutUserAdmin(parameters: User_PutUserAdminRequest): PromiseLike<any>;
             User_PutUserRole(parameters: User_PutUserRoleRequest): PromiseLike<any>;
             User_GetAllUsers(): PromiseLike<AdminResponse>;
-            User_PutUser(parameters: User_PutUserRequest): PromiseLike<any>;
-            User_GetUser(parameters: User_GetUserRequest): PromiseLike<any>;
+            User_GetUser(parameters: User_GetUserRequest): PromiseLike<AdminResponse>;
         }
     }
 }

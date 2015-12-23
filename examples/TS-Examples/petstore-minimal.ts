@@ -8,8 +8,8 @@ namespace nSwagger {
         }
 
         export interface API {
-            setToken(value:string, headerOrQueryName:string, isQuery:boolean):void;
-            (): PromiseLike<Pet>;
+            setToken(value: string, headerOrQueryName: string, isQuery: boolean): void;
+            getPets(): PromiseLike<Pet>;
         }
     }
 }
