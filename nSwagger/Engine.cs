@@ -80,7 +80,7 @@
                 if (parseAsURL)
                 {
                     //uri
-                    var result = await HTTP.HTTP.GetStreamAsync(uri);
+                    var result = await HTTP.HTTP.HTTPCallAsync("GET", uri, new HTTP.HTTPOptions(TimeSpan.FromMinutes(2)));
                     if (result == null)
                     {
                         throw new nSwaggerException("Unable to get Swagger defination from URI: " + uri.AbsoluteUri);
@@ -89,7 +89,8 @@
                     var temp = Path.GetTempFileName();
                     using (var fileStream = new FileStream(temp, FileMode.Create, FileAccess.Write))
                     {
-                        await result.CopyToAsync(fileStream);
+                        var resultStream = await result.Content.ReadAsStreamAsync();
+                        await resultStream.CopyToAsync(fileStream);
                     }
 
                     path = temp;

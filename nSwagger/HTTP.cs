@@ -45,11 +45,7 @@
             return client;
         }
 
-        internal static async Task<HttpResponseMessage> PutAsync(Uri uri, HTTPOptions httpOptions, HttpContent content = null, string token = null) => await HTTPCallAsync("put", uri, httpOptions, content, token);
-
-        internal static async Task<HttpResponseMessage> PostAsync(Uri uri, HTTPOptions httpOptions, HttpContent content = null, string token = null) => await HTTPCallAsync("post", uri, httpOptions, content, token);
-
-        private static async Task<HttpResponseMessage> HTTPCallAsync(string method, Uri uri, HTTPOptions options, HttpContent content = null, string token = null)
+        public static async Task<HttpResponseMessage> HTTPCallAsync(string method, Uri uri, HTTPOptions options, HttpContent content = null, string token = null)
         {
             using (var client = CreateClient())
             {
@@ -143,37 +139,6 @@
 
             return null;
         }
-
-        internal static async Task<HttpResponseMessage> HeadAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("head", uri, httpOptions, token: token);
-
-        internal static async Task<HttpResponseMessage> OptionsAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("options", uri, httpOptions, token: token);
-
-        internal static async Task<HttpResponseMessage> PatchAsync(Uri uri, HTTPOptions httpOptions, HttpContent content, string token = null) => await HTTPCallAsync("patch", uri, httpOptions, content, token: token);
-
-        internal static async Task<HttpResponseMessage> DeleteAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("delete", uri, httpOptions, token: token);
-
-        internal static async Task<Stream> GetStreamAsync(Uri uri, int attempt = -1)
-        {
-            attempt++;
-            var response = await GetAsync(uri, new HTTPOptions(TimeSpan.FromMinutes(2)));
-            Debug.WriteLine("Uri: " + uri);
-            if (response != null)
-            {
-                Debug.WriteLine("HTTP Status Code: " + response.StatusCode);
-                var result = await response.Content.ReadAsStreamAsync();
-                return result;
-            }
-
-            if (attempt < 3)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return await GetStreamAsync(uri, attempt);
-            }
-
-            return null;
-        }
-
-        internal static async Task<HttpResponseMessage> GetAsync(Uri uri, HTTPOptions httpOptions, string token = null) => await HTTPCallAsync("get", uri, httpOptions, token: token);
     }
 
     public class APIResponse<T>

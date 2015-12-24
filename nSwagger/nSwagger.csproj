@@ -130,9 +130,10 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="CSharpGenerator.cs" />
-    <Compile Include="HTTP.cs">
+    <None Include="HTTPClient.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
+    </None>
+    <Compile Include="HTTP.cs" />
     <Compile Include="nSwaggerException.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Specification.cs" />

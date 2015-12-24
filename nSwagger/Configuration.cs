@@ -43,5 +43,7 @@
         public string[] Sources { get; set; }
 
         public string Target { get; set; }
+
+        public bool IncludeHTTPClientForCSharp { get; set; } = true;
     }
 }
