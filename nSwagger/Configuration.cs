@@ -31,6 +31,8 @@
 
         public TimeSpan HTTPTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
+        public bool IncludeHTTPClientForCSharp { get; set; } = true;
+
         [JsonConverter(typeof(StringEnumConverter))]
         public TargetLanguage Language { get; set; }
 
@@ -44,6 +46,18 @@
 
         public string Target { get; set; }
 
-        public bool IncludeHTTPClientForCSharp { get; set; } = true;
+        public static Configuration LoadFromFile(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || !File.Exists(fileName))
+            {
+                return null;
+            }
+
+            var folder = Path.GetFullPath(fileName);
+            var settings = File.ReadAllText(fileName);            
+            var result = JsonConvert.DeserializeObject<Configuration>(settings);
+            result.Target = folder + Path.GetFileName(result.Target);
+            return result;
+        }
     }
 }

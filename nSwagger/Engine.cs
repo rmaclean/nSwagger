@@ -23,6 +23,12 @@
         {
             Validation(config);
             var specifications = await GetSpecifications(config);
+            var targetPath = Path.GetFullPath(config.Target);
+            if (!Directory.Exists(targetPath))
+            {
+                Directory.CreateDirectory(targetPath);
+            }
+
             if (config.Language.HasFlag(TargetLanguage.csharp))
             {
                 foreach (var spec in specifications)
@@ -50,7 +56,8 @@
 
             if (config.SaveSettings)
             {
-                var serialisedSettings = JsonConvert.SerializeObject(config);
+                config.Target = Path.GetFileName(config.Target);
+                var serialisedSettings = JsonConvert.SerializeObject(config);                
                 var settingsFile = config.Target + ".nSwagger";
                 if (File.Exists(settingsFile))
                 {

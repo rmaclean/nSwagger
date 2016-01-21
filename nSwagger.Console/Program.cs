@@ -17,7 +17,8 @@
             TargetFileExists = 4,
             Help = 8,
             Unknown = 16,
-            InvalidLanguage = 32
+            InvalidLanguage = 32,
+            InvalidConfig = 64
         }
 
         private static int Main(string[] args)
@@ -38,8 +39,12 @@
             if (args.Length == 2 && args[0].Equals("/L"))
             {
                 var settingsFile = args[1];
-                var settings = File.ReadAllText(settingsFile);
-                swaggerConfig = JsonConvert.DeserializeObject<Configuration>(settings);
+                swaggerConfig = Configuration.LoadFromFile(settingsFile);
+                if (swaggerConfig == null)
+                {
+                    Console.WriteLine("ERROR: Configuration file provided not found or invalid");
+                    return (int)ExitCodes.InvalidConfig;
+                }
             }
             else
             {

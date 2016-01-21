@@ -229,8 +229,13 @@
 
         private void LoadSettingsInternal(string fileName)
         {
-            var settings = File.ReadAllText(fileName);
-            var swaggerConfig = JsonConvert.DeserializeObject<Configuration>(settings);
+            var swaggerConfig = Configuration.LoadFromFile(fileName);
+            if (swaggerConfig == null)
+            {
+                MessageBox.Show("Configuration file not found or invalid.");
+                return;
+            }
+
             AllowOverride = swaggerConfig.AllowOverride;
             CustomNamespace = swaggerConfig.Namespace;
             if (swaggerConfig.Language.HasFlag(TargetLanguage.csharp))
