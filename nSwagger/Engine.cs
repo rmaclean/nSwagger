@@ -23,7 +23,7 @@
         {
             Validation(config);
             var specifications = await GetSpecifications(config);
-            var targetPath = Path.GetFullPath(config.Target);
+            var targetPath = Path.GetDirectoryName(config.Target);
             if (!Directory.Exists(targetPath))
             {
                 Directory.CreateDirectory(targetPath);
@@ -56,15 +56,17 @@
 
             if (config.SaveSettings)
             {
-                config.Target = Path.GetFileName(config.Target);
+                var originalTarget = config.Target;
+                config.Target = Path.GetFileName(originalTarget);
                 var serialisedSettings = JsonConvert.SerializeObject(config);                
-                var settingsFile = config.Target + ".nSwagger";
+                var settingsFile = originalTarget + ".nSwagger";
                 if (File.Exists(settingsFile))
                 {
                     File.Delete(settingsFile);
                 }
 
                 File.WriteAllText(settingsFile, serialisedSettings);
+                config.Target = originalTarget;
             }
 
             return result.ToArray();

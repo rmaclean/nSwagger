@@ -27,6 +27,7 @@
 
         public bool DoNotWriteTargetFile { get; set; }
 
+        [JsonIgnore]
         public string HTTPCSPath { get; set; }
 
         public TimeSpan HTTPTimeout { get; set; } = TimeSpan.FromSeconds(30);
@@ -53,10 +54,10 @@
                 return null;
             }
 
-            var folder = Path.GetFullPath(fileName);
+            var folder = Path.GetDirectoryName(fileName);
             var settings = File.ReadAllText(fileName);            
             var result = JsonConvert.DeserializeObject<Configuration>(settings);
-            result.Target = folder + Path.GetFileName(result.Target);
+            result.Target = Path.Combine(folder, result.Target);
             return result;
         }
     }
