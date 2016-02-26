@@ -39,7 +39,7 @@
 
         public string Namespace { get; set; } = "nSwagger";
 
-        public string nSwaggerVersion { get; } = "0.0.1";
+        public string nSwaggerVersion { get; } = "0.0.2";
 
         public bool SaveSettings { get; set; }
 

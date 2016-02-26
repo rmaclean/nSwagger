@@ -75,7 +75,7 @@
 
             if (item.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
             {
-                return "[]";
+                return "Array<any>";
             }
 
             return CleanClassName(item.Type);
@@ -197,7 +197,56 @@
             }
         }
 
-        private void AddClass(CoderStringBuilder output, string sourceName, Property[] properties)
+        private void AddParameterInterface(CoderStringBuilder output, string sourceName, Parameter[] parameters)
+        {
+            var name = CleanClassName(sourceName);
+            if (existingInterfaces.Contains(name))
+            {
+                return;
+            }
+
+            existingInterfaces.Add(name);
+
+            output.AppendLine($"export interface {name} {{");
+            output.Indent();
+            foreach (var parameter in parameters)
+            {
+                var propertyName = parameter.Name;
+                if (!parameter.Required)
+                {
+                    propertyName += "?";
+                }
+
+                var propertyType = "any";
+                var bodyParameter = parameter as BodyParameter;
+                if (bodyParameter != null)
+                {
+                    propertyType = SchemaTypeCleaner(bodyParameter.Schema);
+                }
+
+                var otherParameter = parameter as OtherParameter;
+                if (otherParameter != null)
+                {
+                    var arrayParameter = parameter as OtherArrayParameter;
+                    if (arrayParameter != null)
+                    {
+                        propertyType = $"Array<{CleanClassName(arrayParameter.Items[0].Type)}>";
+                    }
+                    else
+                    {
+                        propertyType = CleanClassName(otherParameter.Type);
+                    }
+                }
+
+                output.AppendLine($"{propertyName}: {propertyType};");
+            }
+
+            output.Outdent();
+            output.AppendLine("}");
+            output.AppendLine();
+        }
+
+        private void AddTypes(CoderStringBuilder output, string sourceName, Property[] properties)
         {
             var enums = new List<EnumInfo>();
             var name = CleanClassName(sourceName);
@@ -208,7 +257,7 @@
 
             existingInterfaces.Add(name);
 
-            output.AppendLine($"export class {name} {{");
+            output.AppendLine($"export interface {name} {{");
             output.Indent();
             if (properties != null)
             {
@@ -258,55 +307,6 @@
                 output.AppendLine("}");
                 output.AppendLine();
             }
-        }
-
-        private void AddParameterInterface(CoderStringBuilder output, string sourceName, Parameter[] parameters)
-        {
-            var name = CleanClassName(sourceName);
-            if (existingInterfaces.Contains(name))
-            {
-                return;
-            }
-
-            existingInterfaces.Add(name);
-
-            output.AppendLine($"export interface {name} {{");
-            output.Indent();
-            foreach (var parameter in parameters)
-            {
-                var propertyName = parameter.Name;
-                if (!parameter.Required)
-                {
-                    propertyName += "?";
-                }
-
-                var propertyType = "any";
-                var bodyParameter = parameter as BodyParameter;
-                if (bodyParameter != null)
-                {
-                    propertyType = SchemaTypeCleaner(bodyParameter.Schema);
-                }
-
-                var otherParameter = parameter as OtherParameter;
-                if (otherParameter != null)
-                {
-                    var arrayParameter = parameter as OtherArrayParameter;
-                    if (arrayParameter != null)
-                    {
-                        propertyType = CleanClassName(arrayParameter.Items[0].Type) + "[]";
-                    }
-                    else
-                    {
-                        propertyType = CleanClassName(otherParameter.Type);
-                    }
-                }
-
-                output.AppendLine($"{propertyName}: {propertyType};");
-            }
-
-            output.Outdent();
-            output.AppendLine("}");
-            output.AppendLine();
         }
 
         private string CamelCase(IEnumerable<string> segments)
@@ -382,7 +382,7 @@
             output.Indent();
             foreach (var defination in specification.Definations)
             {
-                AddClass(output, defination.Name, defination.Properties);
+                AddTypes(output, defination.Name, defination.Properties);
             }
 
             foreach (var path in specification.Paths)
@@ -429,15 +429,15 @@
             {
                 if (string.IsNullOrWhiteSpace(property.ArrayItemType))
                 {
-                    return "any[]";
+                    return "Array<any>";
                 }
 
                 if (property.ArrayItemType.Contains('/'))
                 {
-                    return RefToClass(property.ArrayItemType) + "[]";
+                    return $"Array<{RefToClass(property.ArrayItemType)}>";
                 }
 
-                return CleanClassName(property.ArrayItemType) + "[]";
+                return $"Array<{CleanClassName(property.ArrayItemType)}>";
             }
 
             return CleanClassName(property.Type);
@@ -454,13 +454,10 @@
 
             if (property.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
             {
-                var array = "[]";
+                var array = "Array<any>";
                 if (property.Items != null && property.Items.Length == 1)
                 {
-                    array = CleanClassName(ItemTypeCleaner(property.Items[0]) + "[]");
-                }
-                else {
-                    array = "any[]";
+                    array = $"Array<{CleanClassName(ItemTypeCleaner(property.Items[0]))}>";
                 }
 
                 return array;

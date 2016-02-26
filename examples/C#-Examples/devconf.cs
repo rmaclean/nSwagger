@@ -11,11 +11,11 @@ namespace nSwagger
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class SwaggerPetstore
+    public class DevConfRatings
     {
         private readonly string url;
         private readonly ISwaggerHTTPClient httpClient;
-        public SwaggerPetstore(string url = null, ISwaggerHTTPClient httpClient = null)
+        public DevConfRatings(string url = null, ISwaggerHTTPClient httpClient = null)
         {
             if (!string.IsNullOrWhiteSpace(url))
             {
@@ -23,59 +23,273 @@ namespace nSwagger
             }
             else
             {
-                this.url = "http://petstore.swagger.io";
+                this.url = "https://localhost:24110";
             } if  ( httpClient == null ) { this . httpClient  =  new  SwaggerHTTPClient ( ) ;  } else  { this . httpClient  =  httpClient ;  }
 
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
-        public partial class Pet
+        public partial class GetRatings
         {
-            public long id
-            {
-                get;
-                set;
-            }
-
-            public string name
-            {
-                get;
-                set;
-            }
-
-            public string tag
+            public string Email
             {
                 get;
                 set;
             }
         }
 
-        //<remarks>
-        // Returns all pets from the system that the user has access to
-        //</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
+        public partial class RatingSession
+        {
+            public string Comment
+            {
+                get;
+                set;
+            }
+
+            public int Order
+            {
+                get;
+                set;
+            }
+
+            public int Rating
+            {
+                get;
+                set;
+            }
+
+            public int SessionId
+            {
+                get;
+                set;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
+        public partial class Rating
+        {
+            public string Email
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session1
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session2
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session3
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session4
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session5
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session6
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session7
+            {
+                get;
+                set;
+            }
+
+            public RatingSession Session8
+            {
+                get;
+                set;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
+        public partial class TimeSlot
+        {
+            public string End
+            {
+                get;
+                set;
+            }
+
+            public int Order
+            {
+                get;
+                set;
+            }
+
+            public Session[] Sessions
+            {
+                get;
+                set;
+            }
+
+            public string Start
+            {
+                get;
+                set;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("", "RECS0001:Class is declared partial but has only one part", Justification = "This is partial to allow the file to extended in a seperate file if needed. Changes to this file would be lost when the code is regenerated and so supporting a seperate file for this is ideal.")]
+        public partial class Session
+        {
+            public int Id
+            {
+                get;
+                set;
+            }
+
+            public string Presenter
+            {
+                get;
+                set;
+            }
+
+            public string Title
+            {
+                get;
+                set;
+            }
+
+            public string Track
+            {
+                get;
+                set;
+            }
+        }
+
+        //<summary>
+        // Gets previously entered reviews
+        //</summary>
         //<returns>
-        // A list of pets.
+        // Success
         //</returns>
-        public async Task<APIResponse<Pet[]>> GetpetsAsync()
+        //<param name="request">email or token for lookup</param>
+        public async Task<APIResponse<RatingSession[]>> Rating_PostGetRatingAsync(GetRatings request)
         {
             {
-                var response = await httpClient.GetAsync(new Uri(url + "/pets", UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds(30)));
+                var response = await httpClient.PostAsync(new Uri(url + "/api/rating/history", UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds(30)), new StringContent(JsonConvert.SerializeObject(request)));
                 if (response == null)
                 {
-                    return new APIResponse<Pet[]>(false);
+                    return new APIResponse<RatingSession[]>(false);
                 }
 
                 switch ((int)response.StatusCode)
                 {
                     case 200:
                     {
-                        var data = JsonConvert.DeserializeObject<Pet[]>(await response.Content.ReadAsStringAsync());
-                        return new APIResponse<Pet[]>(successData: data, statusCode: response.StatusCode);
+                        var data = JsonConvert.DeserializeObject<RatingSession[]>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<RatingSession[]>(successData: data, statusCode: response.StatusCode);
+                    }
+
+                    case 400:
+                    {
+                        return new APIResponse<RatingSession[]>(response.StatusCode);
+                    }
+
+                    case 404:
+                    {
+                        return new APIResponse<RatingSession[]>(response.StatusCode);
                     }
 
                     default:
                     {
-                        return new APIResponse<Pet[]>(response.StatusCode);
+                        return new APIResponse<RatingSession[]>(response.StatusCode);
+                    }
+                }
+            }
+        }
+
+        //<summary>
+        // Used to add a rating or update a rating in the system
+        //</summary>
+        //<returns>
+        // Success
+        //</returns>
+        //<param name="rating">The rating value</param>
+        public async Task<APIResponse<string>> Rating_PostAddRatingAsync(Rating rating)
+        {
+            {
+                var response = await httpClient.PostAsync(new Uri(url + "/api/Rating", UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds(30)), new StringContent(JsonConvert.SerializeObject(rating)));
+                if (response == null)
+                {
+                    return new APIResponse<string>(false);
+                }
+
+                switch ((int)response.StatusCode)
+                {
+                    case 400:
+                    {
+                        return new APIResponse<string>(response.StatusCode);
+                    }
+
+                    case 401:
+                    {
+                        return new APIResponse<string>(response.StatusCode);
+                    }
+
+                    case 204:
+                    {
+                        var data = JsonConvert.DeserializeObject<string>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<string>(successData: data, statusCode: response.StatusCode);
+                    }
+
+                    default:
+                    {
+                        return new APIResponse<string>(response.StatusCode);
+                    }
+                }
+            }
+        }
+
+        //<summary>
+        // Gets all the sessions
+        //</summary>
+        //<returns>
+        // Success
+        //</returns>
+        public async Task<APIResponse<TimeSlot[]>> Session_GetSessionsAsync()
+        {
+            {
+                var response = await httpClient.GetAsync(new Uri(url + "/api/Session", UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds(30)));
+                if (response == null)
+                {
+                    return new APIResponse<TimeSlot[]>(false);
+                }
+
+                switch ((int)response.StatusCode)
+                {
+                    case 200:
+                    {
+                        var data = JsonConvert.DeserializeObject<TimeSlot[]>(await response.Content.ReadAsStringAsync());
+                        return new APIResponse<TimeSlot[]>(successData: data, statusCode: response.StatusCode);
+                    }
+
+                    default:
+                    {
+                        return new APIResponse<TimeSlot[]>(response.StatusCode);
                     }
                 }
             }

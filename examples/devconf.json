@@ -1,0 +1,153 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "v1",
+        "title": "DevConfRatings"
+    },
+    "host": "localhost:24110",
+    "schemes": [ "https" ],
+    "paths": {
+        "/api/rating/history": {
+            "post": {
+                "tags": [ "Rating" ],
+                "summary": "Gets previously entered reviews",
+                "operationId": "Rating_PostGetRating",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "description": "email or token for lookup",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/GetRatings" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/RatingSession" }
+                        }
+                    },
+                    "400": { "description": "Invalud email/token" },
+                    "404": { "description": "User not found" }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Rating": {
+            "post": {
+                "tags": [ "Rating" ],
+                "summary": "Used to add a rating or update a rating in the system",
+                "operationId": "Rating_PostAddRating",
+                "consumes": [ "application/json", "text/json", "application/xml", "text/xml", "application/x-www-form-urlencoded" ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "parameters": [
+                    {
+                        "name": "rating",
+                        "in": "body",
+                        "description": "The rating value",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/Rating" }
+                    }
+                ],
+                "responses": {
+                    "400": { "description": "Data provided is wrong" },
+                    "401": { "description": "User account is disabled" },
+                    "204": {
+                        "description": "Success",
+                        "schema": { "type": "string" }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Session": {
+            "get": {
+                "tags": [ "Session" ],
+                "summary": "Gets all the sessions",
+                "operationId": "Session_GetSessions",
+                "consumes": [ ],
+                "produces": [ "application/json", "text/json", "application/xml", "text/xml" ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/TimeSlot" }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    },
+    "definitions": {
+        "GetRatings": {
+            "type": "object",
+            "properties": { "Email": { "type": "string" } }
+        },
+        "RatingSession": {
+            "type": "object",
+            "properties": {
+                "Comment": { "type": "string" },
+                "Order": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Rating": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "SessionId": {
+                    "format": "int32",
+                    "type": "integer"
+                }
+            }
+        },
+        "Rating": {
+            "type": "object",
+            "properties": {
+                "Email": { "type": "string" },
+                "Session1": { "$ref": "#/definitions/RatingSession" },
+                "Session2": { "$ref": "#/definitions/RatingSession" },
+                "Session3": { "$ref": "#/definitions/RatingSession" },
+                "Session4": { "$ref": "#/definitions/RatingSession" },
+                "Session5": { "$ref": "#/definitions/RatingSession" },
+                "Session6": { "$ref": "#/definitions/RatingSession" },
+                "Session7": { "$ref": "#/definitions/RatingSession" },
+                "Session8": { "$ref": "#/definitions/RatingSession" }
+            }
+        },
+        "TimeSlot": {
+            "type": "object",
+            "properties": {
+                "End": { "type": "string" },
+                "Order": {
+                    "format": "int32",
+                    "type": "integer",
+                    "readOnly": true
+                },
+                "Sessions": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/Session" }
+                },
+                "Start": { "type": "string" }
+            }
+        },
+        "Session": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "Presenter": { "type": "string" },
+                "Title": { "type": "string" },
+                "Track": { "type": "string" }
+            }
+        }
+    }
+}
