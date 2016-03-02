@@ -75,6 +75,8 @@
         private void AddSwaggerCommand(object sender, EventArgs e)
         {
             var project = VsHelpers.GetActiveProject(_dte);
+            //todo: figure out if we doing CS or TS based on project type - if possible
+            //todo: if we on a folder node, path should be folder
             var uiOptions = new UIOptions
             {
                 Overwrite = true
@@ -88,6 +90,12 @@
 
         private void UpdateItem_BeforeQueryStatus(object sender, EventArgs e)
         {
+            var button = sender as OleMenuCommand;
+            button.Visible = false;
+
+            var items = VsHelpers.GetSelectedItems(_dte);
+            //todo: check if items > 0, check file extension is nSwagger - if it is, then show update button
+            //todo: figure out why 
             System.Diagnostics.Debugger.Break();
         }
 

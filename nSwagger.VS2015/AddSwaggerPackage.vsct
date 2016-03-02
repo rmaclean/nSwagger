@@ -1,24 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <Extern href="stdidcmd.h"/>
-  <Extern href="vsshlids.h"/>
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
   <Commands package="guidAddSwaggerPackage">
     <Buttons>
       <Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerCommand" priority="0x0100" type="Button">
-        <Parent guid="guidAddSwaggerPackageCmdSet" id="ProjectOnlyMenuGroup" />
-        <Icon guid="guidImages" id="bmpPic1" />
-        <Strings>
-          <ButtonText>Add Swagger Reference</ButtonText>
-        </Strings>
-      </Button>
-
-      <!--<Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerCommand" priority="0x0100" type="Button">
         <Parent guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Add Swagger Reference</ButtonText>
         </Strings>
-      </Button>-->
+      </Button>
 
       <Button guid="guidAddSwaggerPackageCmdSet" id="UpdateSwaggerCommand" priority="0x0100" type="Button">
         <Parent guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" />
@@ -32,19 +24,21 @@
     </Buttons>
     <Groups>
       <Group guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" priority="0x0200">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
       </Group>
       <Group guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" priority="0x0200">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
       </Group>
-      <Group guid="guidAddSwaggerPackageCmdSet" id="ProjectOnlyMenuGroup" priority="0x0200">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE"/>
+      <Group guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" priority="0x0200">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_WEBITEMNODE" />
       </Group>
+      <Group guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" priority="0x0200">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE" />
+      </Group>      
     </Groups>
 
-
     <Bitmaps>
-      <Bitmap guid="guidImages" href="Resources\AddSwagger.png" usedList="bmpPic1"/>
+      <Bitmap guid="guidImages" href="Resources\AddSwagger.png" usedList="bmpPic1" />
     </Bitmaps>
   </Commands>
 
@@ -60,7 +54,7 @@
       <IDSymbol name="UpdateSwaggerCommand" value="0x1030" />
     </GuidSymbol>
 
-    <GuidSymbol name="guidImages" value="{8c953bd7-9aab-44c0-bf6b-b53b14bcdc4f}" >
+    <GuidSymbol name="guidImages" value="{8c953bd7-9aab-44c0-bf6b-b53b14bcdc4f}">
       <IDSymbol name="bmpPic1" value="1" />
     </GuidSymbol>
   </Symbols>
