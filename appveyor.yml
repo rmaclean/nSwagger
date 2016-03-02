@@ -1,0 +1,33 @@
+version: 0.0.2.{build}
+skip_tags: true
+os: Visual Studio 2015
+configuration:
+- consoleAppVeyor
+- wpfAppVeyor
+before_build:
+- cmd: nuget restore
+build:
+  parallel: true
+  verbosity: minimal
+test: off
+artifacts:
+- path: nSwagger.Console\bin\consoleAppVeyor
+- path: nSwagger.GUI\bin\wpfAppVeyor
+deploy:
+- provider: GitHub
+  tag: v0.0.1-alpha+$(APPVEYOR_BUILD_NUMBER)
+  release: v0.0.1-alpha+$(APPVEYOR_BUILD_NUMBER)
+  description: This pre-release contains both a WPF client (wpfAppVeyor.zip) and a command line client (consoleAppVeyor.zip), which can be used to generate both TypeScript definitions and C# client code. This is pre-release, so it should work but likely has bugs and limitations. If you find any issues, please let us know using the [issues](https://github.com/rmaclean/nSwagger/issues). Thanks :)
+  auth_token:
+    secure: Wf17O3zGAtxCF+OFpY03+GEXroCvjv45yk6/oAkRLpkxmORGuLFynlyvQIXaQO7I
+  prerelease: true
+  on:
+    APPVEYOR_REPO_TAG: false
+notifications:
+- provider: Email
+  to:
+  - Robert@sadev.co.za
+  subject: '[nSwagger] Build Completed'
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
