@@ -7,6 +7,8 @@
       <Button guid="guidAddSwaggerPackageCmdSet" id="AddSwaggerCommand" priority="0x0100" type="Button">
         <Parent guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        
         <Strings>
           <ButtonText>Add Swagger Reference</ButtonText>
         </Strings>

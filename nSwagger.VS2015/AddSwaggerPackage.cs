@@ -9,6 +9,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Runtime.InteropServices;
+    using System.Linq;
 
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
@@ -50,6 +51,11 @@
         {
             base.Initialize();
             _dte = GetService(typeof(DTE)) as DTE2;
+            AddButtons();
+        }
+
+        private void AddButtons()
+        {
             var commandService = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService == null)
             {
@@ -59,7 +65,8 @@
             {
                 //add command
                 var menuCommandID = new CommandID(CommandSet, 0x1020);
-                var menuItem = new MenuCommand(AddSwaggerCommand, menuCommandID);
+                var menuItem = new OleMenuCommand(AddSwaggerCommand, menuCommandID);
+                menuItem.BeforeQueryStatus += AddItem_BeforeQueryStatus;
                 commandService.AddCommand(menuItem);
             }
 
@@ -70,6 +77,15 @@
                 menuItem.BeforeQueryStatus += UpdateItem_BeforeQueryStatus;
                 commandService.AddCommand(menuItem);
             }
+        }
+
+        private void AddItem_BeforeQueryStatus(object sender, EventArgs e)
+        {
+            var button = sender as OleMenuCommand;
+            button.Visible = false;
+
+            var items = VsHelpers.GetSelectedItems(_dte);
+            System.Diagnostics.Debugger.Break();
         }
 
         private void AddSwaggerCommand(object sender, EventArgs e)
@@ -94,9 +110,19 @@
             button.Visible = false;
 
             var items = VsHelpers.GetSelectedItems(_dte);
-            //todo: check if items > 0, check file extension is nSwagger - if it is, then show update button
-            //todo: figure out why 
-            System.Diagnostics.Debugger.Break();
+            var swaggerFile = items.FirstOrDefault();
+            if (swaggerFile == null)
+            {
+                return;
+            }
+
+            var fileinfo = new FileInfo(items.First().FileNames[0]);
+            if (!fileinfo.Extension.Equals("nswagger", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            button.Visible = true;
         }
 
         private void UpdateSwaggerCommand(object sender, EventArgs e)

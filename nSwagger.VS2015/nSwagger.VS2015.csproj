@@ -205,7 +205,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\AddSwagger.png" />
-    <Content Include="Resources\AddSwaggerPackage.ico" />
+    <Content Include="Resources\AddSwaggerPackage.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\nSwagger.GUI\nSwagger.GUI.csproj">
