@@ -1,6 +1,7 @@
 ﻿namespace nSwagger
 {
     using Newtonsoft.Json;
+    using System.Linq;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -59,7 +60,7 @@
                 var originalTarget = config.Target;
                 config.Target = Path.GetFileName(originalTarget);
                 var serialisedSettings = JsonConvert.SerializeObject(config);                
-                var settingsFile = originalTarget + ".nSwagger";
+                var settingsFile = $"{originalTarget}.nSwagger";
                 if (File.Exists(settingsFile))
                 {
                     File.Delete(settingsFile);
@@ -92,7 +93,7 @@
                     var result = await HTTP.HTTP.HTTPCallAsync("GET", uri, new HTTP.HTTPOptions(TimeSpan.FromMinutes(2)));
                     if (result == null)
                     {
-                        throw new nSwaggerException("Unable to get Swagger defination from URI: " + uri.AbsoluteUri);
+                        throw new nSwaggerException($"Unable to get Swagger defination from URI: {uri.AbsoluteUri}");
                     }
 
                     var temp = Path.GetTempFileName();
@@ -109,7 +110,7 @@
                     //file
                     if (!File.Exists(input))
                     {
-                        throw new nSwaggerException("Unable to get Swagger defination from file: " + input);
+                        throw new nSwaggerException($"Unable to get Swagger defination from file: {input}");
                     }
 
                     path = input;
@@ -139,6 +140,21 @@
                 if (!config.AllowOverride)
                 {
                     throw new nSwaggerException("Target file already exists and cannot be overwritten.");
+                }
+
+                var targetFileVersionIdentifier = File.ReadLines(config.Target).First();
+                if (!string.IsNullOrWhiteSpace(targetFileVersionIdentifier) && targetFileVersionIdentifier.IndexOf(Messages.VersionIdentifierPrefix, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    var versionString = targetFileVersionIdentifier.Substring(targetFileVersionIdentifier.IndexOf(':') + 1);
+                    var existingVersion = default(Version);
+                    if (Version.TryParse(versionString, out existingVersion))
+                    {
+                        var currentVersion = Version.Parse(config.nSwaggerVersion);
+                        if (currentVersion < existingVersion)
+                        {
+                            throw new nSwaggerException($"You are attempting to update a nSwagger file using an old version of this tool. You must be on a version of {existingVersion} or later.");
+                        }
+                    }
                 }
 
                 File.Delete(config.Target);
