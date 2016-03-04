@@ -8,7 +8,7 @@
         <Parent guid="guidAddSwaggerPackageCmdSet" id="ProjectAndItemMenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
         <CommandFlag>DynamicVisibility</CommandFlag>
-        
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
           <ButtonText>Add Swagger Reference</ButtonText>
         </Strings>

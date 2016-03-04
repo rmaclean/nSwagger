@@ -33,6 +33,7 @@
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(AddSwaggerPackage.PackageGuidString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
     public sealed class AddSwaggerPackage : Package
     {
         /// <summary>
@@ -117,7 +118,7 @@
             }
 
             var fileinfo = new FileInfo(items.First().FileNames[0]);
-            if (!fileinfo.Extension.Equals("nswagger", StringComparison.OrdinalIgnoreCase))
+            if (!fileinfo.Extension.Equals(".nswagger", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
