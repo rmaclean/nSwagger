@@ -258,7 +258,14 @@
 
             existingInterfaces.Add(name);
 
-            output.AppendLine($"export interface {name} {{");
+            var type = "interface";
+            var enumProperties = (properties?.Any(_ => _.Enum != null));
+            if (enumProperties.HasValue && enumProperties.Value)
+            {
+                type = "class";
+            }
+
+            output.AppendLine($"export {type} {name} {{");
             output.Indent();
             if (properties != null)
             {
@@ -278,6 +285,25 @@
                     }
 
                     output.AppendLine($"{propertyName}: {propertyType};");
+                }
+
+                foreach (var property in properties.Where(_ => _.Enum != null))
+                {
+                    var propertyName = property.Name;
+                    var enumName = name + propertyName;
+                    output.AppendLine();
+                    output.AppendLine($"get {propertyName}AsEnum(): {enumName} {{");
+                    output.Indent();
+                    output.AppendLine($"return {enumName}[this.{propertyName}];");
+                    output.Outdent();
+                    output.AppendLine("}");
+
+                    output.AppendLine();
+                    output.AppendLine($"set {propertyName}AsEnum(value:{enumName}) {{");
+                    output.Indent();
+                    output.AppendLine($"this.{propertyName} = {enumName}[value];");
+                    output.Outdent();
+                    output.AppendLine("}");
                 }
             }
 

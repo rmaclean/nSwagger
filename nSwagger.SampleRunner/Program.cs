@@ -127,7 +127,7 @@
             {
                 Files = files,
                 Config = config,
-                CompilerArguments = new[] { "--noEmit" },
+                CompilerArguments = new[] { "--noEmit -t ES5" },
                 CompilerPath = @"C:\Users\v-robmc\AppData\Roaming\npm\tsc.cmd",
                 ExamplesDirectory = @"examples\TS-Examples\",
                 Extension = ".ts",
