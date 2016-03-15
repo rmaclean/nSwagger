@@ -19,7 +19,8 @@
             var syntax = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.IdentifierName(config.Namespace));
             syntax = syntax.WithLeadingTrivia(syntax.GetLeadingTrivia()
                 .Add(SyntaxFactory.Comment($"//{Messages.VersionIdentifierPrefix}:{config.nSwaggerVersion}"))
-                .Add(SyntaxFactory.Comment($"// {Messages.Notice}")));
+                .Add(SyntaxFactory.Comment($"// {Messages.Notice}"))
+                .Add(SyntaxFactory.Comment($"// {Messages.LastGenerated} {DateTime.UtcNow:o}")));
 
             syntax = syntax.AddUsings(Using("Newtonsoft.Json"),
                                       Using("System"),
@@ -454,7 +455,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             var constructor = SyntaxFactory.ConstructorDeclaration(className)
                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                .AddParameterListParameters(parameters.Select(_ => Parameter(_)).ToArray())
-               .AddBodyStatements(SyntaxFactory.ParseStatement(body));
+               .AddBodyStatements(body.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Select(_ => SyntaxFactory.ParseStatement(_)).ToArray());
 
             return constructor;
         }
@@ -484,7 +485,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             var constructorCode = $@"if (!string.IsNullOrWhiteSpace(url)){{ this.url = url;}} else {{ this.url = ""{spec.Schemes[0]}://{spec.Host}""; }}";
             if (config.IncludeHTTPClientForCSharp)
             {
-                constructorCode += $@"if (httpClient == null){{ this.httpClient = new SwaggerHTTPClient();}} else {{ this.httpClient = httpClient; }}";
+                constructorCode += Environment.NewLine + " if (httpClient == null){ this.httpClient = new SwaggerHTTPClient();} else { this.httpClient = httpClient; }";
             }
 
             var baseClass = SyntaxFactory.ClassDeclaration(className)

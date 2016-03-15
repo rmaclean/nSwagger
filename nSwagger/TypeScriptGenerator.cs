@@ -87,6 +87,7 @@
             var output = new CoderStringBuilder();
             output.AppendLine($"//{Messages.VersionIdentifierPrefix}:{swaggerConfig.nSwaggerVersion}");
             output.AppendLine($"// {Messages.Notice}");
+            output.AppendLine($"// {Messages.LastGenerated} {DateTime.UtcNow:o}");
             output.AppendLine($"namespace {swaggerConfig.Namespace} {{");
             output.Indent();
             foreach (var specification in specifications)
