@@ -1,15 +1,15 @@
 ﻿namespace nSwagger.VS2015
 {
-    using EnvDTE;
-    using EnvDTE80;
-    using GUI;
-    using Microsoft.VisualStudio.Shell;
     using System;
     using System.ComponentModel.Design;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using System.Runtime.InteropServices;
     using System.Linq;
+    using System.Runtime.InteropServices;
+    using EnvDTE;
+    using EnvDTE80;
+    using GUI;
+    using Microsoft.VisualStudio.Shell;
 
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.

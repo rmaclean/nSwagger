@@ -62,30 +62,16 @@
 
     public class TypeScriptGenerator
     {
+        private readonly string[] safeJsonTypes = { "string", "boolean", "number", "any" };
         private List<string> existingInterfaces = new List<string>();
         private Regex splitOutGeneric = new Regex("(?<generic>\\w+)\\[(?<type>\\w+)]");
         private Regex whitespace = new Regex("\\s");
-
-        public string ItemTypeCleaner(Item item)
-        {
-            if (!string.IsNullOrWhiteSpace(item.Ref))
-            {
-                return RefToClass(item.Ref);
-            }
-
-            if (item.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Array<any>";
-            }
-
-            return CleanClassName(item.Type);
-        }
 
         public void Run(Configuration swaggerConfig, Specification[] specifications)
         {
             existingInterfaces.Add("any");
             var output = new CoderStringBuilder();
-            output.AppendLine($"//{Messages.VersionIdentifierPrefix}:{swaggerConfig.nSwaggerVersion}");
+            output.AppendLine($"//{Messages.VersionIdentifierPrefix}:{Configuration.nSwaggerVersion}");
             output.AppendLine($"// {Messages.Notice}");
             output.AppendLine($"// {Messages.LastGenerated} {DateTime.UtcNow:o}");
             output.AppendLine($"namespace {swaggerConfig.Namespace} {{");
@@ -159,20 +145,20 @@
                     optional = "?";
                 }
 
-                parameters = $"parameters{optional}: {CleanClassName(operation.OperationId + "Request")}";
+                parameters = $"parameters{optional}: {CleanClassName($"{operation.OperationId}Request")}";
             }
 
             var methodName = "";
             if (operation.OperationId != null)
             {
-                methodName = CleanClassName(operation.OperationId);
+                methodName = CleanClassName(operation.OperationId, false);
             }
             else
             {
-                methodName = CleanClassName(GetPathToMethodName(action.ToString(), path.Path));
+                methodName = CleanClassName(GetPathToMethodName(action.ToString(), path.Path), false);
             }
 
-            var operationContent = new StringBuilder(methodName + "(" + parameters + "): ");
+            var operationContent = new StringBuilder($"{methodName}({parameters}): ");
             var success = operation.Responses.FirstOrDefault(_ => _.HttpStatusCode >= 200 && _.HttpStatusCode <= 299);
             if (success == null || success.Schema == null)
             {
@@ -195,13 +181,13 @@
 
             if (operation.Parameters != null)
             {
-                AddParameterInterface(output, operation.OperationId + "Request", operation.Parameters);
+                AddParameterInterface(output, $"{operation.OperationId}Request", operation.Parameters);
             }
         }
 
         private void AddParameterInterface(CoderStringBuilder output, string sourceName, Parameter[] parameters)
         {
-            var name = CleanClassName(sourceName);
+            var name = CleanClassName(sourceName, false);
             if (existingInterfaces.Contains(name))
             {
                 return;
@@ -209,7 +195,7 @@
 
             existingInterfaces.Add(name);
 
-            output.AppendLine($"export interface {name} {{");
+            output.AppendLine($"export interface I{name} {{");
             output.Indent();
             foreach (var parameter in parameters)
             {
@@ -251,7 +237,7 @@
         private void AddTypes(CoderStringBuilder output, string sourceName, Property[] properties)
         {
             var enums = new List<EnumInfo>();
-            var name = CleanClassName(sourceName);
+            var name = CleanClassName(sourceName, false);
             if (existingInterfaces.Contains(name))
             {
                 return;
@@ -259,34 +245,23 @@
 
             existingInterfaces.Add(name);
 
-            var type = "interface";
+            OutputBasicType(output, false, name, properties, true, enums);
+
             var enumProperties = (properties?.Any(_ => _.Enum != null));
             if (enumProperties.HasValue && enumProperties.Value)
             {
-                type = "class";
-            }
+                OutputBasicType(output, true, name, properties);
 
-            output.AppendLine($"export {type} {name} {{");
-            output.Indent();
-            if (properties != null)
-            {
-                foreach (var property in properties)
-                {
-                    var propertyName = property.Name;
-                    var propertyType = PropertyTypeCleaner(property);
-                    if (property.Enum != null)
-                    {
-                        propertyType = "string";
-                        enums.Add(new EnumInfo
-                        {
-                            EnumPropertyName = propertyName,
-                            EnumValues = property.Enum,
-                            EnumClassName = name + propertyName
-                        });
-                    }
-
-                    output.AppendLine($"{propertyName}: {propertyType};");
-                }
+                output.AppendLine();
+                output.AppendLine("constructor(source?: any) {");
+                output.Indent();
+                output.AppendLine("if (source !== undefined) {");
+                output.Indent();
+                output.AppendLine("Object.assign(this, source);");
+                output.Outdent();
+                output.AppendLine("}");
+                output.Outdent();
+                output.AppendLine("}");
 
                 foreach (var property in properties.Where(_ => _.Enum != null))
                 {
@@ -306,11 +281,9 @@
                     output.Outdent();
                     output.AppendLine("}");
                 }
-            }
 
-            output.Outdent();
-            output.AppendLine("}");
-            output.AppendLine();
+                OutputBasicTypeClose(output);
+            }
 
             foreach (var @enum in enums)
             {
@@ -355,7 +328,7 @@
             });
         }
 
-        private string CleanClassName(string input)
+        private string CleanClassName(string input, bool addInterfacePrefix = true)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
@@ -373,7 +346,12 @@
                 return "number";
             }
 
-            return jsonType;
+            if (safeJsonTypes.Any(_ => _.Equals(jsonType, StringComparison.OrdinalIgnoreCase)))
+            {
+                return jsonType;
+            }
+
+            return addInterfacePrefix ? "I" + jsonType : jsonType;
         }
 
         private string GetPathToMethodName(string method, string path)
@@ -404,9 +382,71 @@
             return method.ToLowerInvariant() + result[0].ToString().ToUpperInvariant() + result.Substring(1);
         }
 
+        private string ItemTypeCleaner(Item item)
+        {
+            if (!string.IsNullOrWhiteSpace(item.Ref))
+            {
+                return RefToClass(item.Ref);
+            }
+
+            if (item.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Array<any>";
+            }
+
+            return CleanClassName(item.Type);
+        }
+
+        private void OutputBasicType(CoderStringBuilder output, bool typeIsClass, string name, Property[] properties, bool close = false, List<EnumInfo> enums = null)
+        {
+            var type = "interface";
+            var prefix = "I";
+            var implements = "";
+            if (typeIsClass)
+            {
+                prefix = "";
+                type = "class";
+                implements = $" implements I{name}";
+            }
+            output.AppendLine($"export {type} {prefix}{name}{implements} {{");
+            output.Indent();
+            if (properties != null)
+            {
+                foreach (var property in properties)
+                {
+                    var propertyName = property.Name;
+                    var propertyType = PropertyTypeCleaner(property);
+                    if (property.Enum != null)
+                    {
+                        propertyType = "string";
+                        enums?.Add(new EnumInfo
+                        {
+                            EnumPropertyName = propertyName,
+                            EnumValues = property.Enum,
+                            EnumClassName = name + propertyName
+                        });
+                    }
+
+                    output.AppendLine($"{propertyName}: {propertyType};");
+                }
+            }
+
+            if (close)
+            {
+                OutputBasicTypeClose(output);
+            }
+        }
+
+        private void OutputBasicTypeClose(CoderStringBuilder output)
+        {
+            output.Outdent();
+            output.AppendLine("}");
+            output.AppendLine();
+        }
+
         private void Process(CoderStringBuilder output, Specification specification)
         {
-            output.AppendLine($"export module {CleanClassName(specification.Info.Title)} {{");
+            output.AppendLine($"export module {CleanClassName(specification.Info.Title, false)} {{");
             output.Indent();
             foreach (var defination in specification.Definations)
             {
@@ -450,7 +490,7 @@
         {
             if (!string.IsNullOrWhiteSpace(property.Ref))
             {
-                return RefToClass(property.Ref);
+                return CleanClassName(RefToClass(property.Ref));
             }
 
             if (property.Type.Equals("array", StringComparison.OrdinalIgnoreCase))
@@ -462,7 +502,7 @@
 
                 if (property.ArrayItemType.Contains('/'))
                 {
-                    return $"Array<{RefToClass(property.ArrayItemType)}>";
+                    return $"Array<{CleanClassName(RefToClass(property.ArrayItemType))}>";
                 }
 
                 return $"Array<{CleanClassName(property.ArrayItemType)}>";
@@ -471,7 +511,7 @@
             return CleanClassName(property.Type);
         }
 
-        private string RefToClass(string @ref) => CleanClassName(@ref.Substring(@ref.IndexOf("/", 2, StringComparison.Ordinal) + 1));
+        private string RefToClass(string @ref) => CleanClassName(@ref.Substring(@ref.IndexOf("/", 2, StringComparison.Ordinal) + 1), false);
 
         private string SchemaTypeCleaner(Schema property)
         {

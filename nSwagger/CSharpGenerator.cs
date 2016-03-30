@@ -1,13 +1,13 @@
 ﻿namespace nSwagger
 {
-    using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class CSharpGenerator
     {
@@ -18,7 +18,7 @@
         {
             var syntax = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.IdentifierName(config.Namespace));
             syntax = syntax.WithLeadingTrivia(syntax.GetLeadingTrivia()
-                .Add(SyntaxFactory.Comment($"//{Messages.VersionIdentifierPrefix}:{config.nSwaggerVersion}"))
+                .Add(SyntaxFactory.Comment($"//{Messages.VersionIdentifierPrefix}:{Configuration.nSwaggerVersion}"))
                 .Add(SyntaxFactory.Comment($"// {Messages.Notice}"))
                 .Add(SyntaxFactory.Comment($"// {Messages.LastGenerated} {DateTime.UtcNow:o}")));
 

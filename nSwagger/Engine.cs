@@ -1,11 +1,11 @@
 ﻿namespace nSwagger
 {
-    using Newtonsoft.Json;
-    using System.Linq;
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Newtonsoft.Json;
 
     public enum HTTPAction
     {
@@ -59,7 +59,7 @@
             {
                 var originalTarget = config.Target;
                 config.Target = Path.GetFileName(originalTarget);
-                var serialisedSettings = JsonConvert.SerializeObject(config);                
+                var serialisedSettings = JsonConvert.SerializeObject(config);
                 var settingsFile = $"{originalTarget}.nSwagger";
                 if (File.Exists(settingsFile))
                 {
@@ -149,7 +149,7 @@
                     var existingVersion = default(Version);
                     if (Version.TryParse(versionString, out existingVersion))
                     {
-                        var currentVersion = Version.Parse(config.nSwaggerVersion);
+                        var currentVersion = Version.Parse(Configuration.nSwaggerVersion);
                         if (currentVersion < existingVersion)
                         {
                             throw new nSwaggerException($"You are attempting to update a nSwagger file using an old version of this tool. You must be on a version of {existingVersion} or later.");

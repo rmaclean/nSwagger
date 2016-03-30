@@ -1,10 +1,10 @@
 ﻿namespace nSwagger
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
     using System;
     using System.IO;
     using System.Reflection;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     [Flags]
     public enum TargetLanguage
@@ -20,6 +20,8 @@
             AddRefactoringEssentialsPartialClassSupression = true;
             HTTPCSPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
         }
+
+        public static string nSwaggerVersion { get; } = "0.0.5";
 
         public bool AddRefactoringEssentialsPartialClassSupression { get; set; }
 
@@ -39,8 +41,6 @@
 
         public string Namespace { get; set; } = "nSwagger";
 
-        public string nSwaggerVersion { get; } = "0.0.4";
-
         public bool SaveSettings { get; set; }
 
         public string[] Sources { get; set; }
@@ -55,7 +55,7 @@
             }
 
             var folder = Path.GetDirectoryName(fileName);
-            var settings = File.ReadAllText(fileName);            
+            var settings = File.ReadAllText(fileName);
             var result = JsonConvert.DeserializeObject<Configuration>(settings);
             result.Target = Path.Combine(folder, result.Target);
             return result;

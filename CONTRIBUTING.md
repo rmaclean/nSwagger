@@ -41,11 +41,6 @@ Guidelines for bug reports:
 2. **Check if the issue has been fixed** &mdash; try to reproduce it using the
    latest `master` or development branch in the repository.
 
-3. **Isolate the problem** &mdash; ideally create an
-   [SSCCE](http://www.sscce.org/) and a live example.
-   Uploading the project on cloud storage (OneDrive, DropBox, et el.)
-   or creating a sample GitHub repository is also helpful.
-
 
 A good bug report shouldn't leave others needing to chase you up for more
 information. Please try to be as detailed as possible in your report. What is
@@ -87,15 +82,6 @@ Good pull requests, patches, improvements and new features are a fantastic
 help. They should remain focused in scope and avoid containing unrelated
 commits.
 
-**Please ask first** before embarking on any significant pull request (e.g.
-implementing features, refactoring code, porting to a different language),
-otherwise you risk spending a lot of time working on something that the
-project's developers might not want to merge into the project.
-
-Please adhere to the [coding guidelines](#code-guidelines) used throughout the
-project (indentation, accurate comments, etc.) and any other requirements
-(such as test coverage).
-
 Adhering to the following process is the best way to get your work
 included in the project:
 
@@ -108,7 +94,7 @@ included in the project:
    # Navigate to the newly cloned directory
    cd <folder-name>
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/madskristensen/<this-repro-name>.git
+   git remote add upstream https://github.com/rmaclean/nSwagger.git
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream:

@@ -13,9 +13,10 @@
         public static void Main()
         {
             Console.Title = "Testing nSwagger";
-            SolutionRoot = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"..\..\..\");
+            SolutionRoot = RemoveLastPathPiece(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), 3)+"\\";
             var path = Path.Combine(SolutionRoot, "examples");
             var files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly);
+            //var files = new[] { Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly).First() };
             var config = new Configuration
             {
                 Language = TargetLanguage.csharp,
@@ -57,6 +58,19 @@
             }
 
             return input;
+        }
+
+        private static string RemoveLastPathPiece(string input, int pathPiecesToRemove)
+        {
+            var position = input.LastIndexOf('\\');
+            var result = input.Substring(0, position);
+            pathPiecesToRemove--;
+            if (pathPiecesToRemove == 0)
+            {
+                return result;
+            }
+
+            return RemoveLastPathPiece(result, pathPiecesToRemove);
         }
 
         private static void RunCompiler(Configuration config, string command, Func<string, string> errorFilter = null, params string[] args)

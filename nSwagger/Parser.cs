@@ -1,11 +1,11 @@
 ﻿namespace nSwagger
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     public static class Parser
     {

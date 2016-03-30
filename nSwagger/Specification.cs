@@ -1,7 +1,7 @@
 ﻿namespace nSwagger
 {
-    using nSwagger.Attributes;
     using System.Linq;
+    using nSwagger.Attributes;
 
     public interface IJsonSchema
     {

@@ -1,13 +1,11 @@
 ﻿namespace nSwagger.GUI
 {
-    using Microsoft.Win32;
-    using Newtonsoft.Json;
     using System;
     using System.ComponentModel;
-    using System.IO;
     using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Input;
+    using Microsoft.Win32;
 
     public class MainViewModel : INotifyPropertyChanged
     {
@@ -22,6 +20,7 @@
 
         public MainViewModel()
         {
+            Version = Configuration.nSwaggerVersion;
             Run = new Command(RunExecute);
             BrowseForFile = new Command(BrowseForFileExecute);
             BrowseForTarget = new Command(BrowseForTargetExecute);
@@ -137,6 +136,8 @@
                 UpdateProperty(ref _url, value);
             }
         }
+
+        public string Version { get; }
 
         protected bool UpdateProperty<T>(ref T currentValue, T newValue, [CallerMemberName] string propertyName = "")
         {

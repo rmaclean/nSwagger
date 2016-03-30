@@ -41,7 +41,16 @@
             <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000" />
             <TextBlock Margin="0,2" Text="Options" FontWeight="Bold" />
             <CheckBox Margin="0,2" Content="Save settings" IsChecked="{Binding SaveSettings, Mode=TwoWay}" />
-            <Button Command="{Binding LoadSettings}" Width="200" HorizontalAlignment="Left">Load Settings</Button>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="200" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Command="{Binding LoadSettings}" Width="200" HorizontalAlignment="Left">Load Settings</Button>
+                <TextBlock Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                    version <Run Text="{Binding Version, FallbackValue=0.0.0, Mode=OneTime}" />
+                </TextBlock>
+            </Grid>
             <Line Margin="0,2" Stroke="SteelBlue" Y1="1" Y2="1" X2="1000" />
             <TextBlock Margin="0,2" Text="Options" FontWeight="Bold" />
             <CheckBox Margin="0,2" Content="Override existing file" IsChecked="{Binding AllowOverride, Mode=TwoWay}" />

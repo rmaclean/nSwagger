@@ -1,10 +1,10 @@
 ﻿namespace nSwagger
 {
-    using EnvDTE;
-    using EnvDTE80;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using EnvDTE;
+    using EnvDTE80;
 
     internal static class VsHelpers
     {
