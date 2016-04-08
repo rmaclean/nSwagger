@@ -21,7 +21,7 @@
             HTTPCSPath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName;
         }
 
-        public static string nSwaggerVersion { get; } = "0.0.5";
+        public static string nSwaggerVersion { get; } = "0.0.6";
 
         public bool AddRefactoringEssentialsPartialClassSupression { get; set; }
 

@@ -11,7 +11,7 @@
     {
         private readonly StringBuilder stringBuilder;
         private string _padding;
-        private int indent = 0;
+        private int indent;
 
         public CoderStringBuilder()
         {

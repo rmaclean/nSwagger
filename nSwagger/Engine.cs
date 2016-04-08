@@ -142,7 +142,7 @@
                     throw new nSwaggerException("Target file already exists and cannot be overwritten.");
                 }
 
-                var targetFileVersionIdentifier = File.ReadLines(config.Target).First();
+                var targetFileVersionIdentifier = File.ReadLines(config.Target).FirstOrDefault();
                 if (!string.IsNullOrWhiteSpace(targetFileVersionIdentifier) && targetFileVersionIdentifier.IndexOf(Messages.VersionIdentifierPrefix, StringComparison.OrdinalIgnoreCase) > -1)
                 {
                     var versionString = targetFileVersionIdentifier.Substring(targetFileVersionIdentifier.IndexOf(':') + 1);

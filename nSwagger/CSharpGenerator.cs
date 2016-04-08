@@ -13,6 +13,7 @@
     {
         private static Regex arrayClassCleaner = new Regex("(\\[(?<class>\\w+)])");
         private static string httpCode;
+        private static string[] nonnullableTypes = { "int", "bool" };
 
         public static void Run(Configuration config, Specification spec)
         {
@@ -22,15 +23,17 @@
                 .Add(SyntaxFactory.Comment($"// {Messages.Notice}"))
                 .Add(SyntaxFactory.Comment($"// {Messages.LastGenerated} {DateTime.UtcNow:o}")));
 
-            syntax = syntax.AddUsings(Using("Newtonsoft.Json"),
-                                      Using("System"),
+            syntax = syntax.AddUsings(Using("System"),
+                                      Using("System.Collections.Generic"),
                                       Using("System.Diagnostics"),
                                       Using("System.IO"),
+                                      Using("System.Linq"),
                                       Using("System.Net"),
                                       Using("System.Net.Http"),
                                       Using("System.Net.Http.Headers"),
                                       Using("System.Threading"),
-                                      Using("System.Threading.Tasks"));
+                                      Using("System.Threading.Tasks"),
+                                      Using("Newtonsoft.Json"));
 
             if (config.IncludeHTTPClientForCSharp)
             {
@@ -144,7 +147,8 @@
                 parameters.Add(new SimplifiedParameter
                 {
                     Name = "oauthToken",
-                    Type = "string"
+                    Type = "string",
+                    Required = true
                 });
             }
 
@@ -157,10 +161,10 @@
                     end = config.Path.Length - 1;
                 }
 
-                operationName = config.HTTPAction.ToString() + config.Path.Substring(1, end);
+                operationName = config.HTTPAction + config.Path.Substring(1, end);
             }
 
-            var methodName = operationName.Replace(" ", "").Trim() + "Async";
+            var methodName = $"{operationName.Replace(" ", "").Trim()}Async";
 
             if (config.Operation.Parameters != null)
             {
@@ -202,7 +206,8 @@
                             Name = name,
                             Type = type.Equals("array", StringComparison.OrdinalIgnoreCase) ? "object[]" : JsonSchemaToDotNetType(type, typeFormat),
                             Location = @param.In,
-                            Description = @param.Description
+                            Description = @param.Description,
+                            Required = @param.Required
                         });
                     }
                 }
@@ -226,7 +231,7 @@
                     {
                         case "OBJECT":
                             {
-                                responseClass = ClassNameNormaliser(operationName + "Out");
+                                responseClass = ClassNameNormaliser($"{operationName}Out");
                                 @class = AddClass(@class, responseClass, successResponse.Schema.Properties, swaggerConfig);
                                 break;
                             }
@@ -306,15 +311,48 @@
             }
 
             var urlPath = config.Path;
-            if (config.Operation.Parameters != null)
+            var queryParameterCode = "";
+            var addQueryParameterCode = false;
+            if (parameters != null)
             {
-                foreach (var urlParam in config.Operation.Parameters.Where(_ => _.In.Equals("PATH", StringComparison.OrdinalIgnoreCase) || _.In.Equals("QUERY", StringComparison.OrdinalIgnoreCase)))
+                var operationParameters = parameters.Where(_ => _.Location != null && (_.Location.Equals("PATH", StringComparison.OrdinalIgnoreCase) || _.Location.Equals("QUERY", StringComparison.OrdinalIgnoreCase))).ToArray();
+                if (operationParameters.Any())
                 {
-                    urlPath = urlPath.Replace("{" + urlParam.Name + "}", "\"+" + urlParam.Name + "+\"");
+                    queryParameterCode = $"var queryParameters = new Dictionary<string,object>({operationParameters.Length});";
+                    foreach (var urlParam in operationParameters)
+                    {
+                        var target = $"{{{urlParam.Name}}}";
+                        var value = $"\"+{urlParam.Name}+\"";
+                        if (urlPath.Contains(target))
+                        {
+                            urlPath = urlPath.Replace(target, value);
+                        }
+                        else
+                        {
+                            addQueryParameterCode = true;
+
+                            if (urlParam.Nullable)
+                            {
+                                queryParameterCode += $"if ({urlParam.Name}.HasValue) {{";
+                                queryParameterCode += $"queryParameters.Add(\"{urlParam.Name}\", {urlParam.Name}.Value);";
+                                queryParameterCode += "}";
+                            }
+                            else
+                            {
+                                queryParameterCode += $"queryParameters.Add(\"{urlParam.Name}\",{urlParam.Name});";
+                            }
+                        }
+                    }
                 }
             }
 
-            httpMethod += $"(new Uri(url + \"{urlPath}\", UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds({swaggerConfig.HTTPTimeout.TotalSeconds}))";
+            var querySuffix = "";
+            if (addQueryParameterCode)
+            {
+                querySuffix = "+\"?\" + queryParameters.Aggregate(\"\", (curr, next) => (curr.Length > 0 ? \"?\" : \"\") + next.Key + \"=\" + next.Value)";
+            }
+
+            httpMethod += $"(new Uri(url + \"{urlPath}\"{querySuffix}, UriKind.Absolute), new SwaggerHTTPClientOptions(TimeSpan.FromSeconds({swaggerConfig.HTTPTimeout.TotalSeconds}))";
             if (hasBodyParam)
             {
                 var bodyParam = parameters.SingleOrDefault(_ => _.Location != null && (_.Location.Equals("body", StringComparison.OrdinalIgnoreCase)));
@@ -340,6 +378,7 @@
 
             var methodBody = $@"
 {{
+{(addQueryParameterCode ? queryParameterCode : "")}
 var response = {httpMethod}
 if (response == null)
 {{
@@ -364,7 +403,7 @@ return new APIResponse<{responseClass}>(false);
                     else
                     {
                         methodBody += $@"var data = JsonConvert.DeserializeObject<{responseClass}>(await response.Content.ReadAsStringAsync());
-return new APIResponse<{responseClass}>(successData: data, statusCode: response.StatusCode);";
+return new APIResponse<{responseClass}>(data, response.StatusCode);";
                     }
                 }
                 else
@@ -376,8 +415,8 @@ return new APIResponse<{responseClass}>(successData: data, statusCode: response.
                     else
                     {
                         var specialData = string.IsNullOrWhiteSpace(response.Schema.Type) ? RefToClass(response.Schema.Ref) : ClassNameNormaliser(response.Schema.Type);
-                        methodBody += $@"var data = JsonConvert.DeserializeObject<{specialData}>(await response.Content.ReadAsStringAsync());
-return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusCode);";
+                        methodBody += $@"var data = JsonConvert.DeserializeObject<{ClassNameNormaliser(specialData)}>(await response.Content.ReadAsStringAsync());
+return new APIResponse<{responseClass}>(data, response.StatusCode);";
                     }
                 }
 
@@ -492,7 +531,7 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
                 .AddMembers(Field("url", "string").AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)),
                             Field("httpClient", "ISwaggerHTTPClient").AddModifiers(SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword)),
-                Constructor(className, constructorCode, new SimplifiedParameter("url", "string", "null"), new SimplifiedParameter("httpClient", "ISwaggerHTTPClient", config.IncludeHTTPClientForCSharp ? "null" : null)))
+                Constructor(className, constructorCode, new SimplifiedParameter("url", "string", "null", true), new SimplifiedParameter("httpClient", "ISwaggerHTTPClient", config.IncludeHTTPClientForCSharp ? "null" : null, true)))
                 .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
             if (spec.Definations != null)
@@ -609,12 +648,19 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             return JsonSchemaToDotNetType(schema.Type, schema.Format);
         }
 
-        private static ParameterSyntax Parameter(SimplifiedParameter values)
+        private static ParameterSyntax Parameter(SimplifiedParameter parameterValue)
         {
-            var param = SyntaxFactory.Parameter(SyntaxFactory.Identifier(values.Name)).WithType(SyntaxFactory.ParseTypeName(values.Type));
-            if (!string.IsNullOrWhiteSpace(values.Default))
+            var paramType = parameterValue.Type;
+            if (!parameterValue.Required && nonnullableTypes.Contains(paramType))
             {
-                param = param.WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression(values.Default)));
+                parameterValue.Nullable = true;
+                paramType = $"Nullable<{paramType}>";
+            }
+
+            var param = SyntaxFactory.Parameter(SyntaxFactory.Identifier(parameterValue.Name)).WithType(SyntaxFactory.ParseTypeName(paramType));
+            if (!string.IsNullOrWhiteSpace(parameterValue.Default))
+            {
+                param = param.WithDefault(SyntaxFactory.EqualsValueClause(SyntaxFactory.ParseExpression(parameterValue.Default)));
             }
 
             return param;
@@ -663,20 +709,23 @@ return new APIResponse<{responseClass}>(data: data, statusCode: response.StatusC
             {
             }
 
-            public SimplifiedParameter(string name, string type, string defaultValue)
+            public SimplifiedParameter(string name, string type, string defaultValue, bool required)
             {
                 Name = name;
                 Type = type;
                 Default = defaultValue;
+                Required = required;
             }
 
             public string Default { get; set; }
 
-            public string Description { get; internal set; }
+            public string Description { get; set; }
 
             public string Location { get; set; }
 
             public string Name { get; set; }
+            public bool Nullable { get; internal set; }
+            public bool Required { get; set; }
 
             public string Type { get; set; }
 

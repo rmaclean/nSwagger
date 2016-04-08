@@ -1,0 +1,293 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "v1",
+        "title": "API"
+    },
+    "host": "localhost:1135",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/api/room/{id}/calendar/add": {
+            "post": {
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Adds to a calendar",
+                "operationId": "Room_PostAddToCalendar",
+                "consumes": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Email for room",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "description": "Start &amp; end date for request",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AddToCalendarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/Object"
+                        }
+                    },
+                    "409": {
+                        "description": "Room already booked"
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/room/available": {
+            "post": {
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Gets all the available rooms in the specified time range",
+                "operationId": "Room_PostAllAvailableRooms",
+                "consumes": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/AvailableRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RoomInfo"
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/room/{id}/calendar": {
+            "post": {
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Gets the calendar for a specific room",
+                "operationId": "Room_PostCalendarForRoom",
+                "consumes": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Email for room",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "request",
+                        "in": "body",
+                        "description": "Date range to limit to",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GetCalendarRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CalendarItem"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error"
+                    }
+                },
+                "deprecated": false
+            }
+        },
+        "/api/Room": {
+            "get": {
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Gets all the rooms",
+                "operationId": "Room_GetAllRooms",
+                "consumes": [ ],
+                "produces": [
+                    "application/json",
+                    "text/json",
+                    "application/xml",
+                    "text/xml"
+                ],
+                "parameters": [
+                    {
+                        "name": "classification",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RoomInfo"
+                            }
+                        }
+                    }
+                },
+                "deprecated": false
+            }
+        }
+    },
+    "definitions": {
+        "AddToCalendarRequest": {
+            "type": "object",
+            "properties": {
+                "Classification": {
+                    "type": "string"
+                },
+                "End": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Start": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "Object": {
+            "type": "object",
+            "properties": { }
+        },
+        "AvailableRoomRequest": {
+            "type": "object",
+            "properties": {
+                "Classification": {
+                    "type": "string"
+                },
+                "End": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Start": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "RoomInfo": {
+            "type": "object",
+            "properties": {
+                "Bookable": {
+                    "type": "boolean"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Classification": {
+                    "type": "string"
+                }
+            }
+        },
+        "GetCalendarRequest": {
+            "type": "object",
+            "properties": {
+                "Classification": {
+                    "type": "string"
+                },
+                "End": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Start": {
+                    "format": "date-time",
+                    "type": "string"
+                }
+            }
+        },
+        "CalendarItem": {
+            "type": "object",
+            "properties": {
+                "Classification": {
+                    "type": "string"
+                },
+                "End": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Owner": {
+                    "type": "string"
+                },
+                "Start": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "Title": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
