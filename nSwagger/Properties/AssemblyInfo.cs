@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("nSwagger")]
 [assembly: AssemblyCopyright("Copyright © nSwagger Team 2015 - 2016")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("0.0.6.0")]
-[assembly: AssemblyFileVersion("0.0.6.0")]
+[assembly: AssemblyVersion("0.0.7.0")]
+[assembly: AssemblyFileVersion("0.0.7.0")]

@@ -76,7 +76,7 @@
             output.AppendLine($"// {Messages.LastGenerated} {DateTime.UtcNow:o}");
             output.AppendLine($"namespace {swaggerConfig.Namespace} {{");
             output.Indent();
-            foreach (var specification in specifications)
+            foreach (var specification in specifications.Where(_ => !_.Error))
             {
                 Process(output, specification);
             }

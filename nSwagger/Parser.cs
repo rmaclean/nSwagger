@@ -588,7 +588,22 @@
         {
             Debug.WriteLine("Starting parsing");
             var result = new Specification();
-            result.Swagger = parsed["swagger"].Value<string>();
+            var swagger = parsed["swagger"];
+            if (swagger == null)
+            {
+                result.Error = true;
+                result.ErrorInformation = new ErrorInformation
+                {
+                    ExceptionMessage = parsed["ExceptionMessage"]?.Value<string>(),
+                    ExceptionType = parsed["ExceptionType"]?.Value<string>(),
+                    Message = parsed["Message"]?.Value<string>(),
+                    StackTrace = parsed["StackTrace"]?.Value<string>()
+                };
+
+                return result;
+            }
+
+            result.Swagger = swagger.Value<string>();
             Debug.WriteLine($"Swagger version {result.Swagger}");
             result.Info = ParseInfoObject(parsed["info"] as JObject);
             result.Host = parsed["host"]?.Value<string>();

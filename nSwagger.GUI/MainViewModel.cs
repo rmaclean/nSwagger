@@ -2,6 +2,7 @@
 {
     using System;
     using System.ComponentModel;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Input;
@@ -233,7 +234,7 @@
             var swaggerConfig = Configuration.LoadFromFile(fileName);
             if (swaggerConfig == null)
             {
-                MessageBox.Show("Configuration file not found or invalid.");
+                MessageBox.Show("Configuration file not found or invalid.", "Error");
                 return;
             }
 
@@ -258,19 +259,19 @@
         {
             if (Language == null)
             {
-                MessageBox.Show("You must select a target language for the project.");
+                MessageBox.Show("You must select a target language for the project.", "Error");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Url))
             {
-                MessageBox.Show("You must select a valid source file or URL.");
+                MessageBox.Show("You must select a valid source file or URL.", "Error");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Target))
             {
-                MessageBox.Show("You must select a valid target file.");
+                MessageBox.Show("You must select a valid target file.", "Error");
                 return;
             }
 
@@ -306,11 +307,20 @@
                     config.Namespace = CustomNamespace;
                 }
 
-                await Engine.Run(config);
+                var result = await Engine.Run(config);
+                if (result.Errors != null && result.Errors.Any())
+                {
+                    foreach (var erroredSpecification in result.Errors)
+                    {
+                        MessageBox.Show(erroredSpecification.ErrorInformation.ToString(), "Error");
+                    }
+
+                    return;
+                }
             }
             catch (nSwaggerException ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message, "Error");
                 return;
             }
             finally
@@ -320,12 +330,12 @@
 
             if (config.Language.HasFlag(TargetLanguage.csharp))
             {
-                MessageBox.Show("Your C# client wrapper has been generated.");
+                MessageBox.Show("Your C# client wrapper has been generated.", "Success");
             }
 
             if (config.Language.HasFlag(TargetLanguage.typescript))
             {
-                MessageBox.Show("Your TypeScript definations has been generated.");
+                MessageBox.Show("Your TypeScript definations has been generated.", "Success");
             }
         }
     }

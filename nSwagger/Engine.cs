@@ -18,9 +18,14 @@
         Patch
     }
 
+    public class EngineRunResult
+    {
+        public IEnumerable<Specification> Errors { get; set; }
+    }
+
     public static class Engine
     {
-        public static async Task Run(Configuration config)
+        public static async Task<EngineRunResult> Run(Configuration config)
         {
             Validation(config);
             var specifications = await GetSpecifications(config);
@@ -32,7 +37,7 @@
 
             if (config.Language.HasFlag(TargetLanguage.csharp))
             {
-                foreach (var spec in specifications)
+                foreach (var spec in specifications.Where(_ => !_.Error))
                 {
                     CSharpGenerator.Run(config, spec);
                 }
@@ -43,6 +48,11 @@
                 var generator = new TypeScriptGenerator();
                 generator.Run(config, specifications);
             }
+
+            return new EngineRunResult
+            {
+                Errors = specifications.Where(_ => _.Error)
+            };
         }
 
         private static async Task<Specification[]> GetSpecifications(Configuration config)

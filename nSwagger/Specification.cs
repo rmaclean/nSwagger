@@ -67,6 +67,22 @@ URL: {Url}";
         public string Name { get; set; }
     }
 
+    public class ErrorInformation
+    {
+        public string ExceptionMessage { get; set; }
+
+        public string ExceptionType { get; set; }
+
+        public string Message { get; set; }
+
+        public string StackTrace { get; set; }
+
+        public override string ToString() => $@"{Message}
+{ExceptionType}
+{ExceptionMessage}
+{StackTrace}";
+    }
+
     public class Example
     {
         public string MimeType { get; set; }
@@ -530,6 +546,10 @@ Parameters: {Parameters?.Aggregate("", (curr, next) => curr + (curr.Length > 0 ?
         public string[] Consumes { get; set; }
 
         public Defination[] Definations { get; set; }
+
+        public bool Error { get; internal set; }
+
+        public ErrorInformation ErrorInformation { get; internal set; }
 
         public ExternalDocs ExternalDocs { get; set; }
 

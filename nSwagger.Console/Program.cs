@@ -16,7 +16,8 @@
             Help = 8,
             Unknown = 16,
             InvalidLanguage = 32,
-            InvalidConfig = 64
+            InvalidConfig = 64,
+            SwaggerError = 128
         }
 
         private static int Main(string[] args)
@@ -121,6 +122,16 @@
                 {
                     Console.Beep();
                 }
+
+                if (engine.Result.Errors != null && engine.Result.Errors.Any())
+                {
+                    foreach (var erroredSpecification in engine.Result.Errors)
+                    {
+                        Console.WriteLine(erroredSpecification.ErrorInformation);
+                    }
+
+                    return (int)ExitCodes.SwaggerError;
+                }
             }
             catch (nSwaggerException ex)
             {
@@ -128,7 +139,7 @@
                 return (int)ExitCodes.Unknown;
             }
 
-            Console.WriteLine("Finished producing code: " + swaggerConfig.Target);
+            Console.WriteLine($"Finished producing code: {swaggerConfig.Target}");
             Console.CursorVisible = true;
             return (int)ExitCodes.Success;
         }
