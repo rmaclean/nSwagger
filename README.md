@@ -55,7 +55,7 @@ As we figure out the right structures the generated code may change between valu
 For C#, the endpoint must support JSON requests/responses, as this is all that is supported by the library.
 
 ### Validation
-For C#, the Swagger defination provides a LOT of information for validating the data. It would be great to have the data provided to the calls validated client side before the call is made.
+For C#, the Swagger definition provides a LOT of information for validating the data. It would be great to have the data provided to the calls validated client side before the call is made.
 
 ### OAuth2 Only
 For C#, The only authentication currently supported is OAuth2.
