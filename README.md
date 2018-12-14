@@ -8,7 +8,7 @@ You can get the latest WPF &amp; console client downloads (&amp; all historic on
 nSwagger is a set of tools for developers who use Microsoft languages (C# & TypeScript) which aim to ease the experience with REST APIs documented using [Swagger 2.0](http://swagger.io).   
 
 For **C#**, nSwagger offers a codegen tool built using the [Roslyn](https://github.com/dotnet/roslyn) compiler and aims to produce a full client library for as the output.  
-For **TypeScript** as there is already a [great JS codegen](https://github.com/wcandillon/swagger-js-codegen), we are focused on generating definations to make it easier to work with the JS from the codegen while working inside of TypeScript.
+For **TypeScript** as there is already a [great JS codegen](https://github.com/wcandillon/swagger-js-codegen), we are focused on generating definitions to make it easier to work with the JS from the codegen while working inside of TypeScript.
 
 ![Example Image](https://raw.githubusercontent.com/rmaclean/nSwagger/master/Assets/example.jpg) 
 
